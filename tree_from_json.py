@@ -96,3 +96,4 @@ create_tree_from_json()
 # for base, node in tree.items():
 #     print(base)
 #     print_tree(node, "", indent=1)
+create_tree_from_json()

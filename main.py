@@ -10,6 +10,7 @@ from document_loader import process_documents_and_create_db, load_vector_databas
 
 from new_web import call_crawler
 from tree_from_json import  create_tree_from_json, extract_markdowns
+from remove_header import remove_header_footer
 
 # --- Load Vector Database (Load when the app starts) ---
 vector_db = None # Load vector DB when the app starts. Make vector_db global for now (for simplicity)
@@ -97,8 +98,10 @@ def process_configuration(website_url, files):
             # temp_file_path = temp_file.name  # Get the file path
             # print(f"Website content saved to temporary file: {temp_file_path}")
             # files.append(temp_file_path)
-            asyncio.run(call_crawler(website_url))
-            create_tree_from_json()
+
+            asyncio.run(main(website_url))
+            remove_header_footer("crawl_results.json")
+            create_tree_from_json("crawl_results.json", "tree_output.json")
             data = None
             with open("tree_output.json","r", encoding="utf-8") as file:
                 data = json.load(file)

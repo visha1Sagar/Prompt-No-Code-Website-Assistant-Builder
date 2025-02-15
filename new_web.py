@@ -11,7 +11,8 @@ from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
 #     headless=False,   # Set headless to False so you can see the browser window.
 #     text_mode=True
 # )
-#
+
+
 # debug_browser = base_browser.clone(
 #     headless=False,
 #     verbose=True      # Verbose mode prints additional debugging info.
@@ -111,7 +112,8 @@ async def call_crawler(start_url: str = "https://nust.edu.pk", output_file: str 
     }
     
     # Save the JSON to a file for later analysis.
-    with open(output_file, "w", encoding="utf-8") as f:
+    with open("crawl_visionrd.json", "w", encoding="utf-8") as f:
+    with open("crawl_visionrd.json", "w", encoding="utf-8") as f:
         json.dump(final_output, f, indent=2, ensure_ascii=False)
         
     print(f"Crawl data saved to {output_file}")
