@@ -94,7 +94,7 @@ async def crawl_page(crawler, url, base_domain, depth, max_depth, visited, pages
     return url
 
 async def call_crawler(start_url: str = "https://nust.edu.pk", output_file: str = "crawl_results.json",):
-    start_url = "https://visionrdai.com/"
+    # start_url = "https://visionrdai.com/"
     base_domain = urlparse(start_url).netloc
     visited = set()
     pages_data = {}  # This will map each URL to its details.
@@ -103,7 +103,7 @@ async def call_crawler(start_url: str = "https://nust.edu.pk", output_file: str 
     async with AsyncWebCrawler() as crawler:
         print("Browser should launch now...")
         # Set max_depth to 2 (or 3, as desired) for the recursive crawl.
-        await crawl_page(crawler, start_url, base_domain, depth=0, max_depth=3, visited=visited, pages_data=pages_data)
+        await crawl_page(crawler, start_url, base_domain, depth=0, max_depth=2, visited=visited, pages_data=pages_data)
     
     # Final output structure: a root URL and a dictionary of pages.
     final_output = {
@@ -112,8 +112,7 @@ async def call_crawler(start_url: str = "https://nust.edu.pk", output_file: str 
     }
     
     # Save the JSON to a file for later analysis.
-    with open("crawl_visionrd.json", "w", encoding="utf-8") as f:
-    with open("crawl_visionrd.json", "w", encoding="utf-8") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         json.dump(final_output, f, indent=2, ensure_ascii=False)
         
     print(f"Crawl data saved to {output_file}")

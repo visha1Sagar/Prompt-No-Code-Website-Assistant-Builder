@@ -99,7 +99,7 @@ def process_configuration(website_url, files):
             # print(f"Website content saved to temporary file: {temp_file_path}")
             # files.append(temp_file_path)
 
-            asyncio.run(main(website_url))
+            asyncio.run(call_crawler(website_url))
             remove_header_footer("crawl_results.json")
             create_tree_from_json("crawl_results.json", "tree_output.json")
             data = None

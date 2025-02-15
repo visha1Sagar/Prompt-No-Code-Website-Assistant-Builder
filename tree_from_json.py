@@ -76,24 +76,3 @@ def extract_markdowns(data):
 
     traverse(data)
     return markdowns
-
-create_tree_from_json()
-
-# def print_tree(node, path="", indent=0):
-#     prefix = "    " * indent
-#     if node["urls"] or node["markdowns"]:
-#         print(f"{prefix}{path} --> URLs: {node['urls']}")
-#         if node["markdowns"]:
-#             print(f"{prefix}         Markdown: {node['markdowns']}")
-#     for segment, child in node["children"].items():
-#         child_path = f"{path}/{segment}" if path else segment
-#         print_tree(child, child_path, indent + 1)
-#
-#
-#
-#
-# # (Optional) Print the tree for each base domain.
-# for base, node in tree.items():
-#     print(base)
-#     print_tree(node, "", indent=1)
-create_tree_from_json()
