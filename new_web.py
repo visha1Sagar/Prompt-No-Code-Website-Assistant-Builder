@@ -1,7 +1,7 @@
 import asyncio
 import json
 import re
-from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
+from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 from urllib.parse import urljoin, urlparse
 from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
 
@@ -25,7 +25,7 @@ md_generator = DefaultMarkdownGenerator(
         "ignore_links": True,
         "ignore_images": True,
         "escape_html": False,
-        "skip_internal_links": True,
+        # "skip_internal_links": True,
         # "body_width": 80
     }
 )
@@ -33,7 +33,8 @@ md_generator = DefaultMarkdownGenerator(
 # # Create a run configuration.
 run_config = CrawlerRunConfig(
     markdown_generator=md_generator,
-    excluded_tags=["a"]
+    # excluded_tags=["a"],
+    cache_mode=CacheMode.BYPASS,
     # md_generator,
     # markdown_generator=md_generator,
     # only_text=True,
@@ -77,7 +78,7 @@ async def crawl_page(crawler, url, base_domain, depth, max_depth, visited, pages
 
     # Store the page details in the dictionary.
     pages_data[url] = {
-        "markdown": result.cleaned_html,
+        "markdown": result.markdown_v2.raw_markdown,
         "child_urls": list(child_urls)
     }
 
