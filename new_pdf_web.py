@@ -60,7 +60,7 @@ async def crawl_page(crawler, url, base_domain, depth, max_depth, visited, pages
         "markdown": result.pdf,
         "child_urls": list(child_urls)
     }
-    elif url.lower().endswith((".doc", ".img", ".png")):
+    elif url.lower().endswith((".doc", ".img", ".png", ".docx")):
         return
     else:
         # print(result.markdown[:200])
