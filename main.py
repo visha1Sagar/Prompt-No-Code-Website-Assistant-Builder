@@ -14,6 +14,7 @@ def test_sql_connection(host, database, username, password):
 
 def chatbot_response(query):
     """Dummy chatbot response."""
+
     return f"Chatbot Response: You asked - '{query}'. (Placeholder response.)"
 
 
