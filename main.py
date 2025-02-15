@@ -1,8 +1,14 @@
+import asyncio
+import tempfile
+
 import gradio as gr
 import psycopg2
-from langchain_community.llms.openai import OpenAI
-
+import requests
+from langchain_openai import OpenAI
 from document_loader import process_documents_and_create_db, load_vector_database, query_vector_database # Import query_vector_database
+
+from new_web import main
+from tree_from_json import  create_tree_from_json, extract_markdowns
 
 # --- Load Vector Database (Load when the app starts) ---
 vector_db = None # Load vector DB when the app starts. Make vector_db global for now (for simplicity)
@@ -74,6 +80,37 @@ def process_configuration(website_url, files):
     if website_url:
         status_messages += "Website URL is there!\n"
         print("Website URL is there!: ", website_url) # Print to console for backend log
+
+        try:
+            # url = 'https://r.jina.ai/'+website_url
+            # headers = {
+            #     'X-With-Links-Summary': 'true'
+            # }
+            #
+            # response = requests.get(url, headers=headers)
+            # # create .txt file for this
+            # temp_file = tempfile.NamedTemporaryFile(mode='w+t', suffix=".txt", delete=False,
+            #                                         encoding='utf-8')  # Create temp .txt file
+            # temp_file.write(response.text)
+            # temp_file.flush()  # Ensure content is written to file
+            # temp_file_path = temp_file.name  # Get the file path
+            # print(f"Website content saved to temporary file: {temp_file_path}")
+            # files.append(temp_file_path)
+            asyncio.run(main(website_url))
+            create_tree_from_json()
+
+            markdown_text = extract_markdowns("tree_output.json")
+
+            with open("scrapped_text.txt", "w",  encoding='utf-8') as file:
+                file.write("\n\n".join(markdown_text))
+
+            files.append("scrapped_text.txt")
+
+
+
+        except Exception as e:
+            return "Error: "+str(e)
+
 
     if files:
         status_messages += "Documents uploaded. Processing and creating vector database...\n"
