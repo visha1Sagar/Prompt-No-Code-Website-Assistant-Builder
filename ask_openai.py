@@ -34,11 +34,7 @@ def ask_openai(prompt, token_count, top_p=0.1, temperature=0.3, presence_penalty
         output = response_data['choices'][0]['message']['content']
         
         # Extract regex pattern using regex
-        regex_match = re.search(r"```python\n(.*?)\n```", output, re.DOTALL)
-        if regex_match:
-            return regex_match.group(1).strip()
-        else:
-            return "No regex pattern found."
+        return output
     else:
         print(f"Failed to get response: {response.status_code}")
         print(response.text)

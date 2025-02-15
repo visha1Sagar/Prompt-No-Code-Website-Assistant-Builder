@@ -13,28 +13,38 @@ markdown_pages = [
 
 # Create a structured prompt for GPT
 prompt = f"""
-I have extracted Markdown pages from a website, and I want to remove the header while keeping the main content.
+I have extracted multiple Markdown pages from a website, and I want to remove the header while keeping the main content intact.
 
-Here are multiple pages of the website’s markdown pages:
+Here are examples of Markdown pages:
 
 ---
-Page 1:
+### Page 1:
 {markdown_pages[0]}
 
 ---
-Page 2:
+### Page 2:
 {markdown_pages[1]}
 
 ---
-Page 3:
+### Page 3:
 {markdown_pages[2]}
 
 ---
 
-Please analyze the pattern in headers across these pages and provide a **generalized regex** that can remove such headers from any similar markdown page while keeping the main content intact.
+### Task:
+1. Analyze the pattern in the headers across all these pages.
+2. Identify where the **main content begins**, typically at the **first Markdown heading (`#`, `##`, `###`, etc.)**.
+3. Generate a **generalized Python regex (`re` module)** that can remove such headers from any similar Markdown page.
 
-The regex should be written in Python `re` format.
+### Requirements:
+- The regex should work **dynamically** for different Markdown pages.
+- It should **remove everything before the first Markdown heading** (e.g., `# Title`, `## Section`, `### Heading`).
+- The regex must be formatted in **Python `re` syntax**, ready for use in `re.sub()`.
+- **Do NOT hardcode any specific phrase**—it must work for different documents.
+
+Please provide **only** the final regex along with a brief explanation of how it works.
 """
+
 
 output= ask_openai(prompt, 1000)
 print(output)
