@@ -85,6 +85,23 @@ def process_documents_and_create_db(files: List):
     return vector_db
 
 
+def query_vector_database(vector_db, query, num_results=4):  # Added num_results parameter
+    """Queries the FAISS vector database and returns relevant document chunks."""
+    if not vector_db:
+        print("Error: Vector database not loaded for querying.")
+        return None
+
+    embeddings = OpenAIEmbeddings()  # Initialize embeddings again (ensure API key is set)
+    query_vector = embeddings.embed_query(query)  # Embed the user query
+    # Perform similarity search in FAISS vector database
+    search_results_with_scores = vector_db.similarity_search_with_score_by_vector(
+        query_vector, k=num_results  # k is the number of nearest neighbors to retrieve
+    )
+    # Extract documents from results (and optionally scores if needed)
+    relevant_documents = [doc for doc, score in search_results_with_scores]  # Just get documents for now
+    return relevant_documents
+
+
 # --- Example Usage (for testing in document_handler.py directly) ---
 if __name__ == "__main__":
 

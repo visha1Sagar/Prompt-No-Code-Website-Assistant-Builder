@@ -1,7 +1,15 @@
 import gradio as gr
 import psycopg2
+from langchain_community.llms.openai import OpenAI
 
-from document_loader import process_documents_and_create_db
+from document_loader import process_documents_and_create_db, load_vector_database, query_vector_database # Import query_vector_database
+
+# --- Load Vector Database (Load when the app starts) ---
+vector_db = None # Load vector DB when the app starts. Make vector_db global for now (for simplicity)
+if vector_db:
+    print("Vector database loaded successfully for Playground!")
+else:
+    print("Warning: Vector database not loaded. Playground might not function for document queries.")
 
 
 def test_sql_connection(host, database, username, password):
@@ -15,13 +23,50 @@ def test_sql_connection(host, database, username, password):
     except Exception as e:
         return f"Error testing SQL Connection: {e}"
 
-def chatbot_response(query):
-    """Dummy chatbot response."""
+def formulate_answer(query, context_chunks):
+    """
+    Formulates an answer using OpenAI GPT based on the query and retrieved context chunks.
+    """
+    if not context_chunks:
+        return "I'm sorry, I couldn't find relevant information in the documents for your query."
 
-    return f"Chatbot Response: You asked - '{query}'. (Placeholder response.)"
+    context_text = "\n\n".join([chunk.page_content for chunk in context_chunks]) # Join chunks into single context string
+    prompt = f"""Answer the question below based on the provided context. Be concise and helpful.
+
+    Question: {query}
+
+    Context:
+    {context_text}
+
+    Answer:"""
+
+    try:
+        llm = OpenAI() # Requires OPENAI_API_KEY environment variable
+        response = llm(prompt)
+        return response.strip() # Return GPT answer, removing leading/trailing whitespace
+    except Exception as e:
+        print(f"Error during answer formulation with OpenAI: {e}")
+        return "I encountered an error while trying to formulate an answer. Please try again later."
+
+
+def chatbot_response(query):
+    """
+    Handles chatbot query: searches vector DB and formulates response.
+    """
+    if not vector_db: # Check if vector_db is loaded
+        return "Please create and load the document vector database first in the Configuration tab."
+
+    relevant_chunks = query_vector_database(vector_db, query) # Search vector DB using query_vector_database from document_handler
+
+    if relevant_chunks:
+        answer = formulate_answer(query, relevant_chunks) # Formulate answer using GPT and retrieved chunks
+        return answer
+    else:
+        return "I'm sorry, I couldn't find relevant information in the documents for your query."
 
 
 def process_configuration(website_url, files):
+    global vector_db
     """
     Processes website URL and documents based on user configuration.
     """
