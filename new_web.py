@@ -116,6 +116,7 @@ async def call_crawler(start_url: str = "https://nust.edu.pk", output_file: str 
         json.dump(final_output, f, indent=2, ensure_ascii=False)
         
     print(f"Crawl data saved to {output_file}")
+    
     return output_file
 
 if __name__ == "__main__":
