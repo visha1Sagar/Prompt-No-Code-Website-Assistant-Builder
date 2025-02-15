@@ -6,16 +6,16 @@ from urllib.parse import urljoin, urlparse
 from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
 
 # # Define a BrowserConfig for Firefox with headless off and verbose logging.
-base_browser = BrowserConfig(
-    browser_type="firefox",
-    headless=False,   # Set headless to False so you can see the browser window.
-    text_mode=True
-)
-
-debug_browser = base_browser.clone(
-    headless=False,
-    verbose=True      # Verbose mode prints additional debugging info.
-)
+# base_browser = BrowserConfig(
+#     browser_type="firefox",
+#     headless=False,   # Set headless to False so you can see the browser window.
+#     text_mode=True
+# )
+#
+# debug_browser = base_browser.clone(
+#     headless=False,
+#     verbose=True      # Verbose mode prints additional debugging info.
+# )
 
 # run_config = CrawlerRunConfig()
 

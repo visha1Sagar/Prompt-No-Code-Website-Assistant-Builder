@@ -66,8 +66,11 @@ def process_documents_and_create_db(files: List):
 
     all_documents = []
     for file in files:
+
         try:
-            documents = load_document(file.name) # Gradio File object has 'name' as path
+            file_name = file if type(file) is str else file.name
+            print("Adding ", file_name, " to the vector db")
+            documents = load_document(file_name) # Gradio File object has 'name' as path
             all_documents.extend(documents)
         except ValueError as e:
             print(f"Skipping file {file.name}: {e}") # Log unsupported file types, continue processing others

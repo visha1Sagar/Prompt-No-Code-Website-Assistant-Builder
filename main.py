@@ -1,4 +1,5 @@
 import asyncio
+import json
 import tempfile
 
 import gradio as gr
@@ -98,8 +99,12 @@ def process_configuration(website_url, files):
             # files.append(temp_file_path)
             asyncio.run(main(website_url))
             create_tree_from_json()
+            data = None
+            with open("tree_output.json","r", encoding="utf-8") as file:
+                data = json.load(file)
+            markdown_text = extract_markdowns(data)
 
-            markdown_text = extract_markdowns("tree_output.json")
+            print("markdown : ", markdown_text)
 
             with open("scrapped_text.txt", "w",  encoding='utf-8') as file:
                 file.write("\n\n".join(markdown_text))
