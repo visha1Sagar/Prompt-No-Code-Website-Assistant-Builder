@@ -77,6 +77,8 @@ def extract_markdowns(data):
     traverse(data)
     return markdowns
 
+create_tree_from_json()
+
 # def print_tree(node, path="", indent=0):
 #     prefix = "    " * indent
 #     if node["urls"] or node["markdowns"]:

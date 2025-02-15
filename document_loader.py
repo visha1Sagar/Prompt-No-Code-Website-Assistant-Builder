@@ -17,14 +17,18 @@ CHUNK_OVERLAP = 200
 def load_document(file_path: str):
     """Loads document based on file extension."""
     ext = os.path.splitext(file_path)[1].lower()
-    if ext == '.pdf':
-        print(f"Loading PDF: {file_path}")
-        loader = PyPDFLoader(file_path)
-    elif ext == '.txt':
-        print(f"Loading TXT: {file_path}")
-        loader = TextLoader(file_path)
-    else:
-        raise ValueError(f"Unsupported document type: {ext}")
+    try:
+        if ext == '.pdf':
+            print(f"Loading PDF: {file_path}")
+            loader = PyPDFLoader(file_path)
+        elif ext == '.txt':
+            print(f"Loading TXT: {file_path}")
+            loader = TextLoader(file_path, encoding="utf8")
+        else:
+            raise ValueError(f"Unsupported document type: {ext}")
+    
+    except Exception as e:
+        print(e)
     return loader.load()
 
 def chunk_documents(documents: List):
@@ -73,9 +77,9 @@ def process_documents_and_create_db(files: List):
             documents = load_document(file_name) # Gradio File object has 'name' as path
             all_documents.extend(documents)
         except ValueError as e:
-            print(f"Skipping file {file.name}: {e}") # Log unsupported file types, continue processing others
+            print(f"Skipping file {file_name}: {e}") # Log unsupported file types, continue processing others
         except Exception as e:
-            print(f"Error loading file {file.name}: {e}") # Log other errors, continue
+            print(f"Error loading file {file_name}: {e}") # Log other errors, continue
 
     if not all_documents:
         print("No valid documents loaded for vector database creation.")

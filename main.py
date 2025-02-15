@@ -8,7 +8,7 @@ import requests
 from langchain_openai import OpenAI
 from document_loader import process_documents_and_create_db, load_vector_database, query_vector_database # Import query_vector_database
 
-from new_web import main
+from new_web import call_crawler
 from tree_from_json import  create_tree_from_json, extract_markdowns
 
 # --- Load Vector Database (Load when the app starts) ---
@@ -97,7 +97,7 @@ def process_configuration(website_url, files):
             # temp_file_path = temp_file.name  # Get the file path
             # print(f"Website content saved to temporary file: {temp_file_path}")
             # files.append(temp_file_path)
-            asyncio.run(main(website_url))
+            asyncio.run(call_crawler(website_url))
             create_tree_from_json()
             data = None
             with open("tree_output.json","r", encoding="utf-8") as file:
