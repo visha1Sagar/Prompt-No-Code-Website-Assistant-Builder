@@ -113,8 +113,10 @@ async def call_crawler(start_url: str = "https://nust.edu.pk", output_file: str 
     # Save the JSON to a file for later analysis.
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(final_output, f, indent=2, ensure_ascii=False)
-    print("Crawl data saved to crawl_results.json")
+        
+    print(f"Crawl data saved to {output_file}")
+    return output_file
 
 if __name__ == "__main__":
     # asyncio.run(main("https://visionrdai.com/"))
-    asyncio.run(main())
+    asyncio.run(call_crawler())
