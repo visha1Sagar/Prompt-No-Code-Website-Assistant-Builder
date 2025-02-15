@@ -1,43 +1,43 @@
 import asyncio
-from langchain_community.document_loaders import RecursiveUrlLoader
 import re
 from bs4 import BeautifulSoup
+from langchain_community.document_loaders import RecursiveUrlLoader
 
-
-def fetch_docs():
-    loader = RecursiveUrlLoader(
-    "https://netsoltech.com/",
-    max_depth=3,
-    use_async=True,
-    extractor=bs4_extractor
-    # metadata_extractor=None,
-    # exclude_dirs=(),
-    # timeout=10,
-    # check_response_status=True,
-    # continue_on_failure=True,
-    # prevent_outside=True,
-    # base_url=None,
-    # ...
-    )
-    # docs_lazy = loader.load()  # Correct use of await inside async function
-    print(loader.load()[0].page_content[:500])
-    # docs = [doc for doc in docs_lazy]
-    # print(len(docs))
-    # return docs[0].page_content
-    # for doc in docs:
-    #     print(doc.page_content[:100])
-    #     print(doc.metadata)
-        
-        
+# Define the extractor function
 def bs4_extractor(html: str) -> str:
     soup = BeautifulSoup(html, "lxml")
     text = soup.get_text()
     cleaned_text = re.sub(r'\n+', '\n', text).strip()
     return cleaned_text
 
+# Define the function to fetch documents
+async def fetch_docs():
+    # Initialize the RecursiveUrlLoader with the specified parameters
+    loader = RecursiveUrlLoader(
+        "https://nust.edu.pk/",
+        max_depth=3,
+        use_async=True,
+        extractor=bs4_extractor,
+        exclude_dirs=(
+            # Add directories or file extensions to exclude binary files
+            '.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.avi', '.mov', '.pdf', '.docx', '.xlsx'
+        ),
+        # Additional parameters can be set as needed
+        # timeout=10,
+        # check_response_status=True,
+        # continue_on_failure=True,
+        # prevent_outside=True,
+        # base_url=None,
+    )
+    
+    # Load the documents asynchronously
+    docs = await loader.aload()
+    
+    # Process and print the content of each document
+    for doc in docs:
+        print(doc.page_content[:500])  # Print the first 500 characters of the page content
+        print(doc.metadata)            # Print the metadata of the document
 
-# Run the async function
-html = fetch_docs()
-# print(bs4_extractor(html))
-
-
+# Run the asynchronous function
+if __name__ == "__main__":
+    asyncio.run(fetch_docs())
