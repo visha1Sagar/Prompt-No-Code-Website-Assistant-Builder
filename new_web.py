@@ -93,7 +93,7 @@ async def crawl_page(crawler, url, base_domain, depth, max_depth, visited, pages
     return url
 
 async def main():
-    start_url = "https://nust.edu.pk/"
+    start_url = "https://giki.edu.pk/"
     base_domain = urlparse(start_url).netloc
     visited = set()
     pages_data = {}  # This will map each URL to its details.
@@ -111,7 +111,7 @@ async def main():
     }
     
     # Save the JSON to a file for later analysis.
-    with open("crawl_results.json", "w", encoding="utf-8") as f:
+    with open("crawl_giki_results.json", "w", encoding="utf-8") as f:
         json.dump(final_output, f, indent=2, ensure_ascii=False)
     print("Crawl data saved to crawl_results.json")
 
