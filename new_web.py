@@ -5,20 +5,6 @@ from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 from urllib.parse import urljoin, urlparse
 from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
 
-# # Define a BrowserConfig for Firefox with headless off and verbose logging.
-# base_browser = BrowserConfig(
-#     browser_type="firefox",
-#     headless=False,   # Set headless to False so you can see the browser window.
-#     text_mode=True
-# )
-
-
-# debug_browser = base_browser.clone(
-#     headless=False,
-#     verbose=True      # Verbose mode prints additional debugging info.
-# )
-
-# run_config = CrawlerRunConfig()
 
 # Define your markdown generator.
 md_generator = DefaultMarkdownGenerator(
@@ -34,20 +20,8 @@ md_generator = DefaultMarkdownGenerator(
 # # Create a run configuration.
 run_config = CrawlerRunConfig(
     markdown_generator=md_generator,
-    # excluded_tags=["a"],
     cache_mode=CacheMode.BYPASS,
-    # md_generator,
-    # markdown_generator=md_generator,
-    # only_text=True,
 )
-
-# config.viewport_width = 1280
-# config.viewport_height = 720
-
-# config.use_managed_browser = False
-
-# Fix: add the missing attribute to the config.
-# config.browser_type = "firefox"
 
 def remove_images(markdown_text: str) -> str:
     """Remove markdown image syntax (e.g. ![alt](url)) from the text."""
@@ -103,7 +77,7 @@ async def call_crawler(start_url: str = "https://nust.edu.pk", output_file: str 
     async with AsyncWebCrawler() as crawler:
         print("Browser should launch now...")
         # Set max_depth to 2 (or 3, as desired) for the recursive crawl.
-        await crawl_page(crawler, start_url, base_domain, depth=0, max_depth=2, visited=visited, pages_data=pages_data)
+        await crawl_page(crawler, start_url, base_domain, depth=0, max_depth=3, visited=visited, pages_data=pages_data)
     
     # Final output structure: a root URL and a dictionary of pages.
     final_output = {

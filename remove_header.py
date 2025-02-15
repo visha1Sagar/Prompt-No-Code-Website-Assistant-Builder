@@ -74,10 +74,12 @@ def remove_header_footer(crawl_file):
     for page in crawl_results["pages"].values():
         page["markdown"] = re.sub(regex, '', page["markdown"], flags=re.DOTALL)
 
-    # crawl_file = crawl_file.replace(".json", "_cleaned.json")
+    new_crawl_file = crawl_file.replace(".json", "_cleaned.json")
 
-    with open(crawl_file, "w", encoding="utf-8") as f:
+    with open(new_crawl_file, "w", encoding="utf-8") as f:
         json.dump(crawl_results, f, indent=2, ensure_ascii=False)
+        
+    return new_crawl_file
 
 
 

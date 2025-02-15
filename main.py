@@ -5,7 +5,7 @@ import tempfile
 import gradio as gr
 import psycopg2
 import requests
-from langchain_openai import OpenAI
+from langchain_openai import ChatOpenAI
 from document_loader import process_documents_and_create_db, load_vector_database, query_vector_database # Import query_vector_database
 
 from new_web import call_crawler
@@ -49,9 +49,20 @@ def formulate_answer(query, context_chunks):
     Answer:"""
 
     try:
-        llm = OpenAI() # Requires OPENAI_API_KEY environment variable
-        response = llm(prompt)
-        return response.strip() # Return GPT answer, removing leading/trailing whitespace
+        messages = [
+    
+        ("system",
+        "Answer the question below based on the provided context. Be concise and helpful.",),
+         ("human", f"""Question: {query}
+          
+          Context: {context_text}
+          
+          
+          Answer:"""),
+        ]
+        llm = ChatOpenAI(model="gpt-4o-mini") # Requires OPENAI_API_KEY environment variable
+        response = llm.invoke(messages)
+        return response.content.strip() # Return GPT answer, removing leading/trailing whitespace
     except Exception as e:
         print(f"Error during answer formulation with OpenAI: {e}")
         return "I encountered an error while trying to formulate an answer. Please try again later."
@@ -99,9 +110,9 @@ def process_configuration(website_url, files):
             # print(f"Website content saved to temporary file: {temp_file_path}")
             # files.append(temp_file_path)
 
-            asyncio.run(call_crawler(website_url))
-            remove_header_footer("crawl_results.json")
-            create_tree_from_json("crawl_results.json", "tree_output.json")
+            # asyncio.run(call_crawler(website_url))
+            new_file = remove_header_footer("crawl_results.json")
+            create_tree_from_json(new_file, "tree_output.json")
             data = None
             with open("tree_output.json","r", encoding="utf-8") as file:
                 data = json.load(file)
