@@ -1,16 +1,15 @@
 import asyncio
 import json
-import tempfile
 
 import gradio as gr
 import psycopg2
-import requests
 from langchain_openai import ChatOpenAI
-from document_loader import process_documents_and_create_db, load_vector_database, query_vector_database # Import query_vector_database
+from document_loader import process_documents_and_create_db, query_vector_database # Import query_vector_database
 
-from new_web import call_crawler
-from tree_from_json import  create_tree_from_json, extract_markdowns
-from remove_header import remove_header_footer
+from crawler.main_crawler import call_crawler
+from text_postprocessing.tree_from_json import create_tree_from_json, extract_markdowns
+from text_postprocessing.remove_header import remove_header_footer
+
 
 # --- Load Vector Database (Load when the app starts) ---
 vector_db = None # Load vector DB when the app starts. Make vector_db global for now (for simplicity)
@@ -32,6 +31,7 @@ def test_sql_connection(host, database, username, password):
         return f"Error testing SQL Connection: {e}"
 
 def formulate_answer(query, context_chunks, context):
+    print("for query: ", query, "\ncontext: ", context_chunks)
     """
     Formulates an answer using OpenAI GPT based on the query and retrieved context chunks.
     """
@@ -43,7 +43,7 @@ def formulate_answer(query, context_chunks, context):
     PREVIOUS QUESTION CONTEXT:
     {context}
     
-    DOCUMENT Chunks:
+    Relevant DOCUMENT Chunks:
     {context_text}
     
     QUESTION:
@@ -56,13 +56,8 @@ def formulate_answer(query, context_chunks, context):
         messages = [
 
         ("system",
-        "Answer the question below based on the provided context. Be concise and helpful.",),
-         ("human", f"""Question: {query}
-          
-          Context: {context_text}
-          
-          
-          Answer:"""),
+        "You're a Website Assitant. Answer the question below based on the provided context. Be concise and helpful.",),
+         ("human", prompt),
         ]
         llm = ChatOpenAI(model="gpt-4o-mini") # Requires OPENAI_API_KEY environment variable
         response = llm.invoke(messages)
@@ -82,7 +77,7 @@ def chatbot_response(query):
     relevant_chunks = query_vector_database(vector_db, query) # Search vector DB using query_vector_database from document_handler
 
     if relevant_chunks:
-        answer = formulate_answer(query, relevant_chunks) # Formulate answer using GPT and retrieved chunks
+        answer = formulate_answer(query, relevant_chunks, "") # Formulate answer using GPT and retrieved chunks
         return answer
     else:
         return "I'm sorry, I couldn't find relevant information in the documents for your query."
@@ -99,6 +94,9 @@ def process_configuration(website_url, files):
         print("Website URL is there!: ", website_url) # Print to console for backend log
 
         try:
+            asyncio.run(call_crawler(website_url))
+            new_file = remove_header_footer("crawl_results.json")
+            create_tree_from_json(new_file, "tree_output.json")
 
             data = None
             with open("tree_output.json","r", encoding="utf-8") as file:

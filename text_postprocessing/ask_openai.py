@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 import re
 
 
-load_dotenv(".env")
-openai_api_key = "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"
+load_dotenv("../.env")
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 def ask_openai(prompt, token_count, top_p=0.1, temperature=0.3, presence_penalty=0.0, frequency_penalty=0.0, developer_prompt=""):
     headers = {
