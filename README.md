@@ -75,6 +75,7 @@
 
     ```bash
     pip install -r requirements.txt
+    playwright --install
     ```
 
 4.  **Configure your OpenAI API Key:**
