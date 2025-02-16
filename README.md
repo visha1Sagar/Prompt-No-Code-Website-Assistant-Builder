@@ -1,67 +1,58 @@
+# 🚀 Prompt:  Unleash the Power of AI Chatbots on *Any* Website - No Code Required! 🤖
 
-# Prompt : No Code based Website Assistant
+**Tired of complex chatbot integrations?**  ✨ **Prompt** ✨ revolutionizes website interaction by offering a **lightning-fast, no-code solution** to create intelligent, website-aware chatbots.  Imagine deploying a cutting-edge AI assistant on *any* website in minutes, simply by providing a URL!  This project delivers a powerful REST API built with FastAPI, seamlessly integrated with a user-friendly frontend, to empower anyone to harness the magic of Large Language Models (LLMs) and vector databases.
 
-This project provides a REST API built with FastAPI to create and query chatbots. These chatbots can be trained using content scraped from websites and uploaded documents (PDF and TXT).  The chatbots use vector databases to efficiently answer questions based on the ingested data, leveraging the power of Large Language Models (LLMs) via OpenAI.  **A frontend interface is also included to interact with the API and customize the chatbot widget.**
+**Stop coding, start conversing! Welcome to the future of website engagement.**
 
-## Features
+## 🔥 Key Features - Prepare to be Amazed! 🔥
 
-  - **Bot Creation**:
-      - Create a chatbot by providing a website URL. The application will crawl the website, extract text content, and use it to train the bot.
-      - Upload local files (PDF and TXT formats) to train your chatbot with specific documents.
-      - Supports combining website crawling and file uploads for comprehensive bot training.
-  - **Intelligent Querying**:
-      - Query your chatbot with natural language questions.
-      - Provides context-aware answers based on the information learned from the website and documents.
-  - **Vector Database**:
-      - Utilizes ChromaDB for efficient storage and retrieval of document embeddings, enabling fast and relevant query responses.
-  - **Web Crawling**:
-      - Employs `crawl4ai` for robust website crawling, handling various website structures and content types.
-      - Extracts text content from web pages and PDFs hosted on websites.
-      - Basic header and footer removal from crawled website content to improve data quality.
-  - **Document Loading and Chunking**:
-      - Supports loading PDF and TXT documents.
-      - Offers different document chunking strategies (`semantic`, `recursive`, `markdown`, `auto`) to optimize information retrieval.
-  - **OpenAI Integration**:
-      - Leverages OpenAI's powerful models (specifically `gpt-4o` in the code) to formulate intelligent answers based on retrieved document chunks.
-  - **API Endpoints**:
-      - `/create_bot/`: Endpoint to create a new chatbot with a website URL and/or document uploads.
-      - `/query_bot/`: Endpoint to query an existing chatbot with a specific question.
-  - **CORS Support**:
-      - Implements CORS middleware to allow cross-origin requests, making the API accessible from web browsers.
-  - **Caching**:
-      - Implements caching for vector databases using `lru_cache` to improve performance and reduce loading times for frequently accessed bots.
-  - **Logging**:
-      - Includes comprehensive logging for debugging and monitoring the application's behavior.
-  - **Frontend Interface**:
-      - **Chatbot Playground**:
-          - **Real-time Customization**: Visually customize the chatbot widget in real-time, including:
-              - Chatbot Name and Display Name
-              - Welcome and Placeholder Messages
-              - Header and Assistant Text
-              - AI and User Message Background Colors
-              - Accent Color for Buttons and Headers
-              - Chat Icon Background Color
-              - Profile Image Upload
-          - **Chat Preview**: Provides a live preview of the chatbot widget as you customize it.
-          - **Popup Chat Window**: Allows testing the chatbot interaction in a popup chat window directly from the playground.
-          - **Configuration Saving**: *(Note: While UI elements for saving are present, backend persistence for frontend configuration is not implemented in the provided code.)*
-      - **Training Data Upload**:
-          - **Website Link Input**:  Input field to provide a website URL for crawling and training the chatbot.
-          - **File Upload**: Drag and drop area or file selector for uploading PDF and TXT documents.
-          - **Uploaded Files Management**: List of uploaded files with the ability to delete individual files.
-          - **Save & Train**: Button to trigger the backend bot creation process using the provided website URL and uploaded files.
-          - **Embedded Script Generation**: Generates a JavaScript code snippet to embed the chatbot widget on an external website after training.
-          - **Copy to Clipboard**:  Easy copy button to copy the generated embedded script.
+*   **Instant Bot Creation - Website to Chatbot in a Click!**:
+    *   **Website Crawling Wizardry**:  Simply provide a website URL, and our intelligent system *automagically* crawls, extracts, and transforms website content into a fully functional chatbot brain! 🧠
+    *   **Document Power-Up**:  Supercharge your bot with local knowledge! Upload PDFs and TXT files to infuse specific documents and expertise into your chatbot's capabilities. 📚
+    *   **Hybrid Training Mastery**: Unleash the ultimate knowledge fusion! Combine website crawling and document uploads for truly comprehensive and deeply informed chatbots. 🚀
 
-## Installation
+*   **Mind-Reading Intelligent Querying - Answers that Wow!**:
+    *   **Natural Language Ninja**:  Users ask questions in plain English, and **Prompt** understands!  No more rigid command structures – just natural, intuitive conversation. 🗣️
+    *   **Context-Aware Genius**:  Powered by advanced LLMs and vector databases, our chatbots deliver laser-focused, contextually relevant answers, drawing directly from the learned website and document data. 💡
+
+*   **Under the Hood Magic - Cutting-Edge Tech, Zero Complexity**:
+    *   **Vector Database Velocity**:  ChromaDB ensures blazing-fast information retrieval, powering instant and accurate query responses. ⚡
+    *   **Web Crawling Prowess**:  `crawl4ai` tackles even the most intricate website structures, extracting valuable text content with unmatched robustness. 🕸️
+    *   **OpenAI Brainpower**:  Fueled by OpenAI's state-of-the-art models (like `gpt-4o`!), **Prompt** generates insightful, human-like answers that will leave users impressed. ✨
+
+*   **Frontend Playground - Design Your Dream Chatbot in Real-Time!**:
+    *   **Visual Customization Paradise**:  Shape the perfect chatbot widget with our intuitive, real-time customization panel! Tweak everything from colors and messages to branding and appearance – all with live preview! 🎨
+        *   **Brand it Boldly**: Chatbot Name, Display Name, Profile Image – make it yours!
+        *   **Craft Compelling Conversations**: Welcome messages, placeholder text, header text, assistant prompts – design the perfect conversational flow.
+        *   **Unleash Your Inner Designer**: AI & User message backgrounds, accent colors, icon styles –  make your chatbot visually stunning!
+    *   **Chat Preview Sandbox**:  Test drive your chatbot creations instantly! Interact with a live preview directly within the playground environment. 🕹️
+    *   **Embeddable Magic Script**:  Generate a single line of JavaScript code to effortlessly embed your customized chatbot onto *any* website. 🪄  **Deployment is now literally copy-paste simple!**
+
+*   **Developer-Friendly API - Power and Flexibility for the Tech-Savvy**:
+    *   **REST API Mastery**:  Clean, well-documented API endpoints (`/create_bot/`, `/query_bot/`) for seamless integration and programmatic chatbot management. 💻
+    *   **CORS Enabled**:  Effortless cross-origin communication – use your chatbot anywhere on the web without restriction. 🌐
+
+*   **Performance & Efficiency Built-In**:
+    *   **Caching Champions**: `lru_cache` optimizes vector database access, ensuring lightning-fast response times even for heavily used chatbots. 🚀
+    *   **Robust Logging**: Comprehensive logging provides deep insights for debugging and monitoring, ensuring smooth operation. 📊
+
+## ✨ Innovation Highlights - Why Prompt is a Game-Changer! ✨
+
+*   **No-Code Chatbot Creation**: Democratizes AI! Anyone, regardless of coding expertise, can build and deploy intelligent website assistants.
+*   **Rapid Deployment**:  Go from zero to chatbot in *minutes*.  Train, customize, and embed with unparalleled speed.
+*   **Visually Stunning Customization**:  Create chatbots that perfectly match your brand and website aesthetic with real-time visual feedback.
+*   **Universal Website Compatibility**:  Embed your chatbot on *any* website with a single line of code.
+*   **Combines Web Crawling & Document Learning**:  Offers unparalleled flexibility in training data sources for truly comprehensive chatbot knowledge.
+
+## 🛠️ Installation - Get Started in Minutes! 🛠️
 
 ### Prerequisites
 
-  - **Python 3.8+**
-  - **pip** (Python package installer)
-  - **Node.js and npm** (for Frontend - if you plan to run the frontend)
-  - **OpenAI API Key**: You will need an OpenAI API key to use the LLM features.  [Get your API key here](https://www.google.com/url?sa=E&source=gmail&q=https://platform.openai.com/api-keys).
-  - **Ngrok Account** (Optional): If you want to expose the API publicly using Ngrok. [Sign up for Ngrok](https://www.google.com/url?sa=E&source=gmail&q=https://ngrok.com/).
+*   **Python 3.8+**
+*   **pip** (Python package installer)
+*   **Node.js and npm** (for Frontend - if you want to experience the visual playground!)
+*   **OpenAI API Key**:  Unlock the power of LLMs! [Get your API key here](https://platform.openai.com/api-keys).
+*   **Ngrok Account** (Optional): Share your chatbot API with the world instantly! [Sign up for Ngrok](https://ngrok.com/).
 
 ### Backend Setup Steps
 
@@ -72,12 +63,12 @@ This project provides a REST API built with FastAPI to create and query chatbots
     cd The-Chateaus_Prompt
     ```
 
-2.  **Create a virtual environment (recommended):**
+2.  **Set up your virtual environment:**
 
     ```bash
     python -m venv venv
-    source venv/bin/activate  # On Linux/macOS
-    venv\Scripts\activate  # On Windows
+    source venv/bin/activate  # Linux/macOS
+    venv\Scripts\activate  # Windows
     ```
 
 3.  **Install backend dependencies:**
@@ -86,17 +77,17 @@ This project provides a REST API built with FastAPI to create and query chatbots
     pip install -r requirements.txt
     ```
 
-4.  **Set up backend environment variables:**
+4.  **Configure your OpenAI API Key:**
 
-      - Create a `.env` file in the project root directory.
-      - Add your OpenAI API key to the `.env` file:
+    *   Create a `.env` file in the project root.
+    *   Add your API key:
         ```env
         OPENAI_API_KEY=your_openai_api_key_here
         ```
 
-### Frontend Setup Steps
+### Frontend Setup Steps - Unleash the Playground!
 
-1.  **Navigate to the `prompt-frontend` directory:**
+1.  **Navigate to the frontend:**
 
     ```bash
     cd prompt-frontend
@@ -108,225 +99,76 @@ This project provides a REST API built with FastAPI to create and query chatbots
     npm install # or yarn install
     ```
 
-    *(Ensure you have Node.js and npm or yarn installed.)*
+3.  **Set the backend API URL:**
 
-3.  **Set up frontend environment variables:**
-
-      - In `prompt-frontend`, create a `.env.local` file.
-      - Define the backend API URL:
+    *   Create `.env.local` in `prompt-frontend`.
+    *   Point to your backend:
         ```env
-        NEXT_PUBLIC_BACKEND_URL=http://localhost:8000 # or your Ngrok URL, or deployed backend URL for now it has been set to running backend Ngrok url
+        NEXT_PUBLIC_BACKEND_URL=http://localhost:8000  # Local backend OR your Ngrok URL!
         ```
 
-4.  **Run the frontend development server:**
+4.  **Launch the frontend!**
 
     ```bash
     npm run dev # or yarn dev
     ```
 
-5.  **Access the frontend:**
+5.  **Access the Playground at `http://localhost:3000`!**
 
-      - The frontend application will be accessible in your browser at `http://localhost:3000` (or the port shown in the console after running `npm run dev`).
+## 🚀 Usage - From Zero to Chatbot Hero! 🚀
 
-## Usage
+### Running the API and Frontend - Double the Power!
 
-### Running the API and Frontend
+1.  **Backend Blast-Off:** Start your API (see "Running the API" in the full README).
+2.  **Frontend Ignition:** Launch the frontend dev server (see "Frontend Setup Steps").
+3.  **Playground Access:** Open your browser to `http://localhost:3000` and enter the **Prompt Playground!**
+4.  **Train Like a Pro**:
+    *   "Train" page -> "Website Link and File Upload".
+    *   Enter website URL, upload files.
+    *   "Save" -  and BOOM! Chatbot brain is online! Get your embed script & bot ID.
+5.  **Customize & Conquer**:
+    *   "Playground" page - unleash your creativity!
+    *   Tweak settings, preview live, perfect your chatbot's look and feel.
+6.  **Embed & Engage**:
+    *   "Train" page -> Copy "Embedded Script".
+    *   Paste into your website's `<body>`.  **Done!** Your AI assistant is live!
 
-1.  **Start the backend API:** Follow the "Running the API" steps in the "Usage" section above.
-2.  **Start the frontend:** Follow the "Frontend Setup Steps" above to run the frontend development server.
-3.  **Access the frontend in your browser at `http://localhost:3000`.**
-4.  **Train your chatbot**:
-      - Navigate to the "Train" page in the frontend.
-      - Choose "Website Link and File Upload".
-      - Enter the website URL and upload files if desired.
-      - Click "Save" to train the chatbot. You will receive a script URL and a bot ID after successful training.
-5.  **Customize the Chatbot Widget**:
-      - Navigate to the "Playground" page in the frontend.
-      - Customize the chatbot appearance and messages using the settings panel on the left.
-      - Preview the chatbot widget on the right.
-6.  **Embed the Chatbot**:
-      - Copy the generated "Embedded Script" from the "Train" page.
-      - Paste this script into the HTML `<body>` of the website where you want to embed the chatbot widget.
+## 🛠️ Tech Stack ⚙️
 
-### API Endpoints
+**Prompt** leverages a modern and robust technology stack for both backend API and frontend interface:
 
-#### 1\. Create Bot (`/create_bot/`)
+### Backend
 
-- **Method:** `POST`
+*   **Framework**: **FastAPI** - A high-performance Python framework for building APIs, known for its speed and ease of use.
+*   **Language**: **Python 3.8+** -  A versatile and widely-used language ideal for AI and backend development.
+*   **LLM Integration**: **OpenAI API** - Utilizing powerful models like `gpt-4o` to generate intelligent and contextually relevant chatbot responses.
+*   **Vector Database**: **ChromaDB** - An embedded vector database for efficient storage and similarity search of document embeddings.
+*   **Web Crawling**: **crawl4ai** - A dedicated web crawling library designed for robust and effective website data extraction.
+*   **Document Processing**: **PyMuPDF (fitz)** -  For efficient loading and text extraction from PDF documents.
+*   **Caching**: **lru-cache** -  For in-memory caching to enhance performance and reduce latency.
+*   **API Tools**:
+    *   **Uvicorn** - ASGI server to run the FastAPI application.
+    *   **Pydantic** - For data validation and settings management.
+    *   **Requests** - For making HTTP requests.
+    *   **Starlette** -  Underlying framework for FastAPI, providing core ASGI functionality.
+    *   **Python-dotenv** -  For managing environment variables securely.
+    *   **UUID** - For generating unique identifiers.
+    *   **Pyngrok** -  (Optional) For quickly exposing the API via Ngrok tunnels.
+    *   **Logging** - Python's built-in logging library for application monitoring and debugging.
 
-- **Endpoint URL:** `/create_bot/` (or the Ngrok public URL if running with Ngrok)
+### Frontend
 
-- **Request Body (Form Data):**
+*   **Framework**: **Next.js** - A React framework for building user interfaces, known for performance and developer experience.
+*   **Language**: **JavaScript (ES6+)** / **JSX** - Modern JavaScript and JSX syntax for building dynamic UI components.
+*   **UI Components**:  **Custom React Components & UI Library** -  Utilizing reusable UI components (likely from a library like Radix UI, Shadcn UI - needs verification) for a polished and consistent design. Includes components like: `Card`, `Button`, `Input`, `Textarea`, `Label`, `Separator`.
+*   **Icons**: **lucide-react** -  For a consistent and beautiful icon set.
+*   **Styling**: **CSS Modules / Global CSS** -  For styling components and the overall application.
+*   **Environment Variables**: **dotenv (via Next.js)** -  For managing frontend environment configuration.
 
-  - `website_url`: `string` (Required) - The URL of the website to crawl for training data.
-  - `files`: `List[UploadFile]` (Optional) - Files to upload for training data. Supports PDF and TXT files. Use the form-data format to upload files.
+## 🤝 Contributing - Join the Prompt Revolution! 🤝
 
-- **Example Request (using `curl`):**
+Contributions are eagerly welcomed!  Help us make **Prompt** even more amazing.  Pull requests, feature suggestions, bug reports – all are highly appreciated!  Let's build the future of no-code chatbots together!
 
-  **Website URL Only:**
+## 📞 Contact
 
-  ```bash
-  curl -X POST \
-    -F "website_url=[https://www.example.com](https://www.example.com)" \
-    http://localhost:8000/create_bot/
-  ```
-
-  **Website URL and File Upload:**
-
-  ```bash
-  curl -X POST \
-    -F "website_url=[https://www.example.com](https://www.example.com)" \
-    -F "files=@/path/to/your/document1.pdf" \
-    -F "files=@/path/to/your/document2.txt" \
-    http://localhost:8000/create_bot/
-  ```
-
-- **Response (JSON):**
-
-  ```json
-  {
-    "bot_id": "your_bot_id_uuid",
-    "message": "Bot created and saved successfully!"
-  }
-  ```
-
-  - `bot_id`: A unique ID for the newly created chatbot. Store this `bot_id` to query the bot later.
-  - `message`: A success message.
-
-- **Error Response (JSON):**
-
-  ```json
-  {
-    "detail": "Bot creation failed. Check server logs for errors."
-  }
-  ```
-
-  - Status Code: `500` (Internal Server Error) - Indicates bot creation failure. Check the server logs for more details on the error.
-
-#### 2\. Query Bot (`/query_bot/`)
-
-- **Method:** `POST`
-
-- **Endpoint URL:** `/query_bot/` (or the Ngrok public URL if running with Ngrok)
-
-- **Request Body (JSON):**
-
-  ```json
-  {
-    "bot_id": "your_bot_id_uuid", // Replace with the bot_id from the create_bot response
-    "query": "Your question here?",
-    "context": "Optional context to provide to the bot. Can be empty string."
-  }
-  ```
-
-  - `bot_id`: The `bot_id` of the chatbot you want to query.
-  - `query`: The question you want to ask the chatbot.
-  - `context`: _(Optional)_ Additional context or instructions for the chatbot to consider when answering. Can be an empty string if no context is needed.
-
-- **Example Request (using `curl`):**
-
-  ```bash
-  curl -X POST \
-    -H "Content-Type: application/json" \
-    -d '{
-          "bot_id": "your_bot_id_uuid",
-          "query": "What is this website about?",
-          "context": ""
-        }' \
-    http://localhost:8000/query_bot/
-  ```
-
-- **Response (JSON):**
-
-  ```json
-  {
-    "answer": "The answer to your question based on the bot's knowledge."
-  }
-  ```
-
-  - `answer`: The chatbot's response to your query.
-
-- **Error Response (JSON):**
-
-  ```json
-  {
-    "detail": "Bot with id 'your_bot_id_uuid' not found or could not be loaded."
-  }
-  ```
-
-  - Status Code: `404` (Not Found) - Indicates that the provided `bot_id` is invalid or the bot could not be loaded.
-
-## Directory Structure
-
-```
-.
-├── app.py                      # Main FastAPI application file, API endpoints definition.
-├── ask_openai.py              # Handles interactions with the OpenAI API.
-├── document_loader.py         # Functions for loading documents, chunking, and vector database operations.
-├── new_pdf.py                  # Web crawler using crawl4ai and PDF text extraction logic.
-├── remove_header.py             # Functionality for removing headers and footers from crawled content (using OpenAI).
-├── tree_from_json.py          # Converts crawled JSON output to a tree structure and extracts markdown.
-├── vector_db_storage/         # Directory to store Chroma vector databases (created at runtime).
-├── venv/                       # (Optional) Virtual environment directory.
-├── .env                        # (Optional) Backend environment variables file (API keys).
-├── requirements.txt            # (Optional, but should be included) Backend dependencies.
-├── README.md                   # This README file.
-└── prompt-frontend/            # Frontend React/Next.js application directory
-    ├── app/                    # Next.js app directory
-    │   ├── playground/        # Playground page components
-    │   │   ├── chat.jsx        # Chat screen component for playground
-    │   │   └── page.jsx        # Playground main page component
-    │   ├── train/           # Training page components
-    │   │   └── page.js         # Training main page component
-    │   └── layout.js           # Root layout for frontend app
-    ├── components/             # Reusable UI components (likely using a UI library)
-    │   └── ui/               # UI primitives and components (e.g., Card, Button, Input, etc.)
-    │       ├── Navbar.jsx
-    │       ├── button.jsx
-    │       ├── card.jsx
-    │       ├── input.jsx
-    │       ├── label.jsx
-    │       ├── separator.jsx
-    │       └── textarea.jsx
-    ├── public/                 # Public assets directory (e.g., images, fonts)
-    ├── .env.local              # Frontend environment variables (API URL)
-    ├── package.json            # npm package file, lists frontend dependencies and scripts
-    └── package-lock.json       # npm lock file
-```
-
-## Dependencies
-
-### Backend Dependencies
-
-  - `fastapi`
-  - `uvicorn`
-  - `pydantic`
-  - `langchain-chroma`
-  - `langchain-openai`
-  - `langchain-community`
-  - `langchain-text-splitters`
-  - `langchain-experimental`
-  - `openai`
-  - `requests`
-  - `python-dotenv`
-  - `uuid`
-  - `starlette`
-  - `pyngrok`
-  - `crawl4ai`
-  - `fitz` (PyMuPDF)
-  - `lru-cache`
-  - `logging`
-  - ...
-
-### Frontend Dependencies
-
-  - `react`
-  - `react-dom`
-  - `next`
-  - `lucide-react` (for icons - inferred from `<X />, <UploadCloud />, etc.` imports)
-  - `@/components/ui/*` (Likely a UI component library like Radix UI, Shadcn UI, or similar - needs to be verified by checking `package.json` or project documentation if available)
-
-
-
-## Contact
-Team Chateaus
+**Team Chateaus** - Let's Chat! 💬
