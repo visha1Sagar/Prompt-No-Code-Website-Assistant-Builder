@@ -1,22 +1,23 @@
 import os
 import tempfile
-from typing import List
+from typing import List, Optional
 import dotenv
 from fastapi import UploadFile
+from langchain_core.documents import Document
+from langchain_text_splitters import MarkdownHeaderTextSplitter
 
 dotenv.load_dotenv('.env')
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-
-from langchain_community.vectorstores import FAISS
+from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_experimental.text_splitter import SemanticChunker
+import logging
 
-# --- Configuration ---
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 200
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
-
-def load_document(file_path: str):
+def load_document(file_path: str) -> List[Document]:
     """Loads document based on file extension."""
     ext = os.path.splitext(file_path)[1].lower()
     try:
@@ -30,169 +31,143 @@ def load_document(file_path: str):
             raise ValueError(f"Unsupported document type: {ext}")
 
     except Exception as e:
-        print(e)
+        logger.error(f"Error loading document {file_path}: {e}")
+        return []
     return loader.load()
 
-def chunk_documents(documents: List):
-    """Splits documents into text chunks."""
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
-    chunks = text_splitter.split_documents(documents)
-    return chunks
+def chunk_documents(documents: List[Document], strategy: str = "semantic") -> List[Document]:
+    """Enhanced chunking with multiple strategies"""
+    chunkers = {
+        "semantic": SemanticChunker(OpenAIEmbeddings()),
+        "recursive": RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+            separators=["\n\n", "\n", ". ", "! ", "? ", " ", ""]
+        ),
+        "markdown": MarkdownHeaderTextSplitter(
+            headers_to_split_on=[
+                ("#", "Header 1"),
+                ("##", "Header 2"),
+                ("###", "Header 3")
+            ]
+        )
+    }
 
+    all_chunks = []
+    for doc in documents:
+        try:
+            if strategy == "auto":
+                content_type = doc.metadata.get('content_type', 'text')
+                chunker = chunkers["markdown" if content_type == "markdown" else "semantic"]
+            else:
+                chunker = chunkers[strategy]
 
-def create_vector_database_from_documents(chunks, persist_directory): # Added persist_directory
-    """Creates and saves a FAISS vector database from text chunks."""
+            chunks = chunker.split_documents([doc])
+            for chunk in chunks:
+                chunk.metadata.update({
+                    'document_id': hash(doc.page_content),
+                    'chunk_strategy': strategy
+                })
+            all_chunks.extend(chunks)
+
+        except Exception as e:
+            logger.warning(f"Chunking failed for document {doc.metadata.get('source')}: {str(e)}")
+            continue
+
+    return all_chunks
+
+def create_vector_database_from_documents(chunks, persist_directory) -> Chroma:
+    """Creates and saves a Chroma vector database from text chunks."""
     embeddings = OpenAIEmbeddings()
-    vector_db = FAISS.from_documents(chunks, embeddings)
-    save_vector_database(vector_db, persist_directory) # Use save_vector_database with directory
+    vector_db = Chroma.from_documents(documents=chunks, embedding=embeddings, persist_directory=persist_directory)
     return vector_db
 
-def save_vector_database(vector_db, persist_directory): # Added persist_directory
-    """Saves FAISS vector database to disk to a specific directory."""
-    if not os.path.exists(persist_directory): # Create directory if it doesn't exist
-        os.makedirs(persist_directory)
-    vector_db.save_local(persist_directory)
-    print(f"Vector database saved to: {persist_directory}")
+def save_vector_database(vector_db, persist_directory):
+    """Saves Chroma vector database to disk to a specific directory."""
+    logger.info(f"Attempting to persist vector database of type: {type(vector_db)}")
+    try:
+        vector_db.persist()
+        logger.info(f"Vector database saved to: {persist_directory}")
+    except Exception as e:
+        logger.error(f"Error during vector_db.persist(): {e}")
+        raise
 
-def load_vector_database(persist_directory): # Added persist_directory
+def load_vector_database(persist_directory) -> Optional[Chroma]:
+    """Loads Chroma vector database from disk from a specific directory."""
     embeddings = OpenAIEmbeddings()
-    index_path = os.path.join(persist_directory, "index.faiss") # Construct path
-    pkl_path = os.path.join(persist_directory, "index.pkl") # Construct path
-
-    if os.path.exists(index_path) and os.path.exists(pkl_path):
-        try:
-            vector_db = FAISS.load_local(persist_directory, embeddings, allow_dangerous_deserialization=True)
-            print(f"Vector database loaded from: {persist_directory}")
-            return vector_db
-        except Exception as e:
-            print(f"Error loading vector database from {persist_directory}: {e}")
-            return None # Handle loading errors gracefully
-    else:
-        print(f"No existing vector database found at: {persist_directory}")
+    try:
+        vector_db = Chroma(persist_directory=persist_directory, embedding_function=embeddings)
+        logger.info(f"Vector database loaded from: {persist_directory}")
+        return vector_db
+    except Exception as e:
+        logger.error(f"Error loading vector database from {persist_directory}: {e}")
         return None
 
-def process_documents_and_create_db(files, persist_directory=None):
+def process_documents_and_create_db(files, persist_directory=None, chunk_strategy: str = "semantic") -> Optional[Chroma]:
     """Processes document files, chunks them, and creates/saves a vector database."""
     documents = []
     if not files:
-        print("No files provided for processing.")
+        logger.info("No files provided for processing.")
         return None
 
     for file in files:
         file_name = None
         file_path_to_load = None
 
-        # --- Robustly determine file_name and file_path ---
-        if isinstance(file, UploadFile): # Check for FastAPI UploadFile first
+        if isinstance(file, UploadFile):
             file_name = file.filename
-            # For UploadFile, we need to use file.file to access the SpooledTemporaryFile
-            file_path_to_load = file.file  # Pass the SpooledTemporaryFile object itself
-            print(f"Detected UploadFile: {file_name}") # Debug log for UploadFile
-        elif hasattr(file, 'filename'): # Check for other file-like objects with 'filename' (e.g., tempfile)
+            file_path_to_load = file.file
+            logger.debug(f"Detected UploadFile: {file_name}")
+        elif hasattr(file, 'filename'):
             file_name = file.filename
-            file_path_to_load = file.file.name if hasattr(file, 'file') and hasattr(file.file, 'name') else file.name # Handle different nested attrs
-            print(f"Detected file-like object with filename: {file_name}") # Debug
-        elif isinstance(file, tempfile._TemporaryFileWrapper): # Explicit tempfile check (might be redundant)
+            file_path_to_load = file.file.name if hasattr(file, 'file') and hasattr(file.file, 'name') else file.name
+            logger.debug(f"Detected file-like object with filename: {file_name}")
+        elif isinstance(file, tempfile._TemporaryFileWrapper):
             file_name = file.name
             file_path_to_load = file.name
-            print(f"Detected tempfile: {file_name}") # Debug
-        elif isinstance(file, str): # Assume it's a file path string
-            file_name = file # Use file path as name for logging
+            logger.debug(f"Detected tempfile: {file_name}")
+        elif isinstance(file, str):
+            file_name = file
             file_path_to_load = file
-            print(f"Detected file path string: {file_name}") # Debug
-        elif isinstance(file, bytes): # Handle raw bytes input (e.g., from memory) - optional, might not be needed
-            file_name = "in_memory_data.txt" # Or generate a unique name
+            logger.debug(f"Detected file path string: {file_name}")
+        elif isinstance(file, bytes):
+            file_name = "in_memory_data.txt"
             file_path_to_load = tempfile.NamedTemporaryFile(mode='wb+', suffix=".txt", delete=False)
-            file_path_to_load.write(file) # Write bytes to temp file
-            file_path_to_load.flush() # Ensure data is written
-            file_path_to_load = file_path_to_load.name # Get temp file path after writing
-            print(f"Detected raw bytes data, saved to temp file: {file_path_to_load}") # Debug
-
+            file_path_to_load.write(file)
+            file_path_to_load.flush()
+            file_path_to_load = file_path_to_load.name
+            logger.debug(f"Detected raw bytes data, saved to temp file: {file_path_to_load}")
         else:
             file_name = "unknown_file"
             file_path_to_load = None
-            print(f"Unknown file type encountered: {type(file)}, skipping.") # More informative skip log
+            logger.warning(f"Unknown file type encountered: {type(file)}, skipping.")
 
-
-        print(f"Loading document: {file_name}, Type: {type(file)}")
+        logger.info(f"Loading document: {file_name}, Type: {type(file)}")
 
         try:
             if file_path_to_load:
-                loaded_docs = load_document(file_path_to_load) # Pass file_path_to_load (could be path string or file-like obj)
+                loaded_docs = load_document(file_path_to_load)
                 documents.extend(loaded_docs)
             else:
-                print(f"Skipping file as no path to load: {file_name}")
-                continue # Skip to next file
-
-
-        except UnicodeDecodeError as e:
-            file_name_for_error = file_name if file_name else "unknown_file" # Use file_name if available
-            print(f"UnicodeDecodeError loading file {file_name_for_error}: {e}")
-            print(f"Trying to load {file_name_for_error} with utf-8 encoding explicitly...")
-            try:
-                loader = TextLoader(file_path_to_load, encoding="utf-8") # Use file_path_to_load
-                loaded_docs = loader.load()
-                documents.extend(loaded_docs)
-                print(f"Successfully loaded {file_name_for_error} with utf-8 encoding after retry.")
-            except Exception as retry_e:
-                file_name_for_retry_error = file_name if file_name else "unknown_file"
-                print(f"Failed to load {file_name_for_retry_error} even with explicit utf-8 encoding: {retry_e}")
-                print(f"Skipping file: {file_name_for_retry_error} due to encoding issues.")
-                continue # Skip on retry error
+                logger.warning(f"Skipping file as no path to load: {file_name}")
+                continue
         except Exception as e:
-            file_name_for_general_error = file_name if file_name else "unknown_file"
-            print(f"Error loading file {file_name_for_general_error}: {e}")
-            continue # Skip on general error
-
+            logger.error(f"Error loading file {file_name}: {e}")
+            continue
 
     if not documents:
-        print("No documents loaded successfully from the provided files.")
+        logger.info("No documents loaded successfully from the provided files.")
         return None
 
-    chunks = chunk_documents(documents)
-    vector_db = create_vector_database_from_documents(chunks, persist_directory) # Pass persist_directory
-    # save_vector_database(vector_db, persist_directory) # Already saved inside create_vector_database_from_documents
+    chunks = chunk_documents(documents, strategy=chunk_strategy)
+    vector_db = create_vector_database_from_documents(chunks, persist_directory)
     return vector_db
 
-
-
-def query_vector_database(vector_db, query, num_results=4):
-    """Queries the FAISS vector database and returns relevant document chunks."""
+def query_vector_database(vector_db, query, num_results=4) -> List[Document]:
+    """Queries the Chroma vector database and returns relevant document chunks."""
     if not vector_db:
-        print("Error: Vector database not loaded for querying.")
-        return None
+        logger.error("Error: Vector database not loaded for querying.")
+        return []
 
-    embeddings = OpenAIEmbeddings()
-    query_vector = embeddings.embed_query(query)
-    search_results_with_scores = vector_db.similarity_search_with_score_by_vector(
-        query_vector, k=num_results
-    )
-    relevant_documents = [doc for doc, score in search_results_with_scores]
+    relevant_documents = vector_db.similarity_search(query, k=num_results)
     return relevant_documents
-
-
-# --- Example Usage (for testing in document_handler.py directly) ---
-if __name__ == "__main__":
-
-    # ... rest of the test code ...
-    bot_id_for_test = "test_bot_id_123" # Example bot_id for testing
-    test_files = ["dummy.txt", "dummy_pdf.pdf"]
-    persist_dir_test = os.path.join("vector_db_storage", bot_id_for_test) # Path for this test bot
-
-    # test_files = ["dummy.txt", "dummy_pdf.pdf"]
-    print("--- Processing Documents and Creating Vector DB ---")
-    vector_db = process_documents_and_create_db([open(f, 'rb') for f in test_files], persist_dir_test)
-
-
-    # print("--- Processing Documents and Creating Vector DB ---")
-    # vector_db =
-    # ([open(f, 'rb') for f in test_files], persist_dir_test) # Pass persist dir
-    if vector_db:
-        print("\n--- Vector DB Created and Saved Successfully! ---")
-        loaded_db = load_vector_database(persist_dir_test)  # Test loading, pass persist dir
-        if loaded_db:
-            print(f"\n--- Vector DB Loaded Successfully from Disk from: {persist_dir_test}! ---")
-        else:
-            print("\n--- Error loading Vector DB ---")
-    else:
-        print("\n--- Vector DB Creation Failed ---")
