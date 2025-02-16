@@ -14,7 +14,7 @@ from functools import lru_cache
 import logging
 
 from document_loader import process_documents_and_create_db, load_vector_database, query_vector_database
-from main import formulate_answer
+from main_gradio import formulate_answer
 from crawler.main_crawler import call_crawler
 from text_postprocessing.remove_header import remove_header_footer
 from text_postprocessing.tree_from_json import extract_markdowns, create_tree_from_json
