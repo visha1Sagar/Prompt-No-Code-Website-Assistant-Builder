@@ -13,11 +13,11 @@ from starlette.middleware.cors import CORSMiddleware
 from functools import lru_cache
 import logging
 
-from document_loader_101 import process_documents_and_create_db, load_vector_database, query_vector_database, save_vector_database
+from document_loader import process_documents_and_create_db, load_vector_database, query_vector_database
 from main import formulate_answer
-from new_pdf import call_crawler
-from remove_header import remove_header_footer
-from tree_from_json import extract_markdowns, create_tree_from_json
+from crawler.main_crawler import call_crawler
+from text_postprocessing.remove_header import remove_header_footer
+from text_postprocessing.tree_from_json import extract_markdowns, create_tree_from_json
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
