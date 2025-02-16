@@ -1,4 +1,4 @@
-# No-Code-Website-AI-Assistant
+# Prompt : Website-AI-Assistant
 
 This project provides a REST API built with FastAPI to create and query chatbots. These chatbots can be trained using content scraped from websites and uploaded documents (PDF and TXT).  The chatbots use vector databases to efficiently answer questions based on the ingested data, leveraging the power of Large Language Models (LLMs) via OpenAI.
 
