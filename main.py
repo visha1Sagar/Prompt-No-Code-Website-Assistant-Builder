@@ -31,7 +31,7 @@ def test_sql_connection(host, database, username, password):
     except Exception as e:
         return f"Error testing SQL Connection: {e}"
 
-def formulate_answer(query, context_chunks):
+def formulate_answer(query, context_chunks, context):
     """
     Formulates an answer using OpenAI GPT based on the query and retrieved context chunks.
     """
@@ -39,18 +39,22 @@ def formulate_answer(query, context_chunks):
         return "I'm sorry, I couldn't find relevant information in the documents for your query."
 
     context_text = "\n\n".join([chunk.page_content for chunk in context_chunks]) # Join chunks into single context string
-    prompt = f"""Answer the question below based on the provided context. Be concise and helpful.
-
-    Question: {query}
-
-    Context:
+    prompt = f"""
+    PREVIOUS QUESTION CONTEXT:
+    {context}
+    
+    DOCUMENT Chunks:
     {context_text}
-
-    Answer:"""
+    
+    QUESTION:
+    {query}
+    
+    ANSWER:
+    """
 
     try:
         messages = [
-    
+
         ("system",
         "Answer the question below based on the provided context. Be concise and helpful.",),
          ("human", f"""Question: {query}
@@ -95,24 +99,7 @@ def process_configuration(website_url, files):
         print("Website URL is there!: ", website_url) # Print to console for backend log
 
         try:
-            # url = 'https://r.jina.ai/'+website_url
-            # headers = {
-            #     'X-With-Links-Summary': 'true'
-            # }
-            #
-            # response = requests.get(url, headers=headers)
-            # # create .txt file for this
-            # temp_file = tempfile.NamedTemporaryFile(mode='w+t', suffix=".txt", delete=False,
-            #                                         encoding='utf-8')  # Create temp .txt file
-            # temp_file.write(response.text)
-            # temp_file.flush()  # Ensure content is written to file
-            # temp_file_path = temp_file.name  # Get the file path
-            # print(f"Website content saved to temporary file: {temp_file_path}")
-            # files.append(temp_file_path)
 
-            # asyncio.run(call_crawler(website_url))
-            new_file = remove_header_footer("crawl_results.json")
-            create_tree_from_json(new_file, "tree_output.json")
             data = None
             with open("tree_output.json","r", encoding="utf-8") as file:
                 data = json.load(file)
