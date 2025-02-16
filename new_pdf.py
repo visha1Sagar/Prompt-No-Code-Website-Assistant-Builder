@@ -99,7 +99,7 @@ async def crawl_page(crawler, url, base_domain, depth, max_depth, visited, pages
             
         except Exception as e:
             print(f"Error processing pdf for {url}: {e}")
-    elif url.lower().endswith((".doc", ".jpg", ".png", ".docx")):
+    elif (url.lower().endswith((".doc", ".jpg", ".png", ".docx")) or any(substring in url.lower() for substring in ("img", ".jpg"))):
         # Skip non-text documents.
         return
     else:
@@ -154,7 +154,7 @@ async def call_crawler(start_url: str = "https://nust.edu.pk", output_file: str 
     # Pass the browser config using the 'browser_config' keyword.
     async with AsyncWebCrawler() as crawler:
         print("Browser should launch now...")
-        await crawl_page(crawler, start_url, base_domain, depth=0, max_depth=3, visited=visited, pages_data=pages_data)
+        await crawl_page(crawler, start_url, base_domain, depth=0, max_depth=4, visited=visited, pages_data=pages_data)
 
     # Final output structure: a root URL and a dictionary of pages.
     final_output = {
@@ -170,4 +170,4 @@ async def call_crawler(start_url: str = "https://nust.edu.pk", output_file: str 
     return output_file
 
 if __name__ == "__main__":
-    asyncio.run(call_crawler("https://nust.edu.pk/"))
+    asyncio.run(call_crawler("https://lums.edu.pk/"))

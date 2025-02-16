@@ -66,8 +66,15 @@ def extract_markdowns(data):
 
     def traverse(node):
         if isinstance(node, dict):
+            content = []
             if "markdowns" in node:
-                markdowns.extend(node["markdowns"])
+                content.extend(node["markdowns"])  # Collect markdown content first
+            if "urls" in node:  # Ensure 'urls' exist and append them immediately after their content
+                content.extend(node["urls"])
+            
+            if content:
+                markdowns.append(" ".join(content))  # Join content and URLs without extra spacing
+            
             for key in node:
                 traverse(node[key])
         elif isinstance(node, list):
