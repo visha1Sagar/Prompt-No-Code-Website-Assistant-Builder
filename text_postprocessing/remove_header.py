@@ -88,7 +88,7 @@
 #     remove_header_footer("crawl_netsol.json")
 
 
-from ask_openai import ask_openai
+from text_postprocessing.ask_openai import ask_openai
 import json
 import ast
 import re

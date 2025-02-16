@@ -13,7 +13,8 @@ from starlette.middleware.cors import CORSMiddleware
 from functools import lru_cache
 import logging
 
-from document_loader import process_documents_and_create_db, load_vector_database, query_vector_database
+from document_loader import process_documents_and_create_db, load_vector_database, query_vector_database, get_embedding, \
+    calculate_cosine_similarity
 from main import formulate_answer
 from crawler.main_crawler import call_crawler
 from text_postprocessing.remove_header import remove_header_footer
@@ -117,7 +118,7 @@ async def create_bot_endpoint(
         raise HTTPException(status_code=500, detail="Bot creation failed. Check server logs for errors.")
 
 @app.post("/query_bot/")
-async def query_bot_endpoint(request: QueryBotRequest):
+async def query_bot_endpoint(request: QueryBotRequest, CONTEXT_QUERY_SIMILARITY_THRESHOLD=0.75):
     bot_id = request.bot_id
     query = request.query
     context = request.context
@@ -126,10 +127,20 @@ async def query_bot_endpoint(request: QueryBotRequest):
     if not vector_db:
         raise HTTPException(status_code=404, detail=f"Bot with id '{bot_id}' not found or could not be loaded.")
 
-    response = query_vector_database(vector_db, context + "\n" + query)
+    context_embedding = get_embedding(context)
+    query_embedding = get_embedding(query)
+    context_query_similarity = calculate_cosine_similarity(context_embedding, query_embedding)
+
+    print(
+        f"Context-Query Similarity Score: {context_query_similarity:.4f}, Threshold: {CONTEXT_QUERY_SIMILARITY_THRESHOLD}")  # Debug
+    relevant_context = context_query_similarity < CONTEXT_QUERY_SIMILARITY_THRESHOLD
+    if relevant_context:
+        response = query_vector_database(vector_db, query)
+    else:
+        response = query_vector_database(vector_db, context + "\n" + query)
 
     if response:
-        answer = formulate_answer(query, response, context)
+        answer = formulate_answer(query, response, context if relevant_context else "")
         return {"answer": answer}
     else:
         return {"answer": "No relevant information found in the bot's documents for your query."}
@@ -141,8 +152,8 @@ if __name__ == "__main__":
     if not os.path.exists("vector_db_storage"):
         os.makedirs("vector_db_storage")
 
-    ngrok_tunnel = ngrok.connect(8000)
+    ngrok_tunnel = ngrok.connect(8002)
     public_url = ngrok_tunnel.public_url
     print(f"Public ngrok URL: {public_url}")  # Output public URL - important!
 
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="localhost", port=8002)

@@ -17,6 +17,22 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+import numpy as np # Import numpy
+
+def calculate_cosine_similarity(embedding1, embedding2):
+    """Calculates cosine similarity between two embeddings."""
+    dot_product = np.dot(embedding1, embedding2)
+    norm_emb1 = np.linalg.norm(embedding1)
+    norm_emb2 = np.linalg.norm(embedding2)
+    if norm_emb1 == 0 or norm_emb2 == 0: # Handle zero norm case to avoid division by zero
+        return 0.0
+    return dot_product / (norm_emb1 * norm_emb2)
+
+def get_embedding(text):
+    """Generates embedding for a given text using OpenAIEmbeddings."""
+    embeddings_model = OpenAIEmbeddings() # Re-instantiate embeddings model here if needed, or pass it as argument
+    return embeddings_model.embed_query(text)
+
 def load_document(file_path: str) -> List[Document]:
     """Loads document based on file extension."""
     ext = os.path.splitext(file_path)[1].lower()
@@ -159,7 +175,7 @@ def process_documents_and_create_db(files, persist_directory=None, chunk_strateg
         logger.info("No documents loaded successfully from the provided files.")
         return None
 
-    chunks = chunk_documents(documents, strategy=chunk_strategy)
+    chunks = chunk_documents(documents, strategy="recursive")
     vector_db = create_vector_database_from_documents(chunks, persist_directory)
     return vector_db
 
