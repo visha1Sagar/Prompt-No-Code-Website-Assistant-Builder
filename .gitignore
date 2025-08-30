@@ -1,6 +1,7 @@
 .env
 /myenv
 /__pycache__
+*/__pycache__/
 /faiss_index
 scrapped_text.txt
 tree_output.json

@@ -8,7 +8,7 @@ import os
 
 from langchain_chroma import Chroma
 from pydantic import BaseModel
-from pyngrok import ngrok
+
 from starlette.middleware.cors import CORSMiddleware
 from functools import lru_cache
 import logging
@@ -141,8 +141,6 @@ if __name__ == "__main__":
     if not os.path.exists("vector_db_storage"):
         os.makedirs("vector_db_storage")
 
-    ngrok_tunnel = ngrok.connect(8000)
-    public_url = ngrok_tunnel.public_url
-    print(f"Public ngrok URL: {public_url}")  # Output public URL - important!
+
 
     uvicorn.run(app, host="localhost", port=8000)
