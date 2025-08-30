@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
+import config from "@/lib/config";
 
 export default function ChatScreen({
   welcomeMessage,
@@ -27,7 +28,7 @@ export default function ChatScreen({
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
-    const response = await fetch(`https://6983-111-68-97-206.ngrok-free.app/query_bot/`, {
+    const response = await fetch(`${config.backendUrl}/query_bot/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

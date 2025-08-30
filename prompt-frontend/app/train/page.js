@@ -14,10 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import config from "@/lib/config";
 
 export default function TrainPage() {
   const [activeTab, setActiveTab] = useState("upload");
-  const backendUrl = process.env.BACKEND_URL
   return (
     <div className="p-6 h-screen bg-gray-100">
       <div className="flex bg-gray-100 max-w-5xl mx-auto">
@@ -123,7 +123,7 @@ const UploadFiles = () => {
 
     try {
       const response = await fetch(
-        `https://6983-111-68-97-206.ngrok-free.app/create_bot/`,
+        `${config.backendUrl}/create_bot/`,
         {
           method: "POST",
           body: formData,
@@ -133,7 +133,7 @@ const UploadFiles = () => {
       if (!response.ok) throw new Error("Failed to send data");
 
       const res = await response.json();
-      setScriptUrl(`https://localhost:3000/api/chatbot/${res.bot_id}`);
+      setScriptUrl(`${config.frontendUrl}/api/chatbot/${res.bot_id}`);
       localStorage.setItem("bot_id", res.bot_id);
     } catch (error) {
       console.error("Error sending data:", error);
