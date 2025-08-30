@@ -53,33 +53,35 @@ class QueryBotRequest(BaseModel):
 async def create_vector_db_from_config(website_url: Optional[str], files: List[UploadFile], bot_id: str) -> Optional[Chroma]:
     files_to_process = list(files or [])
 
-    if not website_url:
-        return None
+    if website_url:
+        logger.info(f"Processing Website URL: {website_url}")
+        try:
+            if not website_url.startswith(('http://', 'https://')):
+                website_url = 'https://' + website_url
 
-    logger.info(f"Processing Website URL: {website_url}")
-    try:
-        if not website_url.startswith(('http://', 'https://')):
-            website_url = 'https://' + website_url
+            # Call crawler to crawl the website
+            await call_crawler(website_url, "crawl_json_temp.json")
+            
+            # Post-process the crawled data
+            new_file = remove_header_footer("crawl_json_temp.json")
+            create_tree_from_json("crawl_json_temp.json", "tree_output_temp.json")
+            
+            # Extract markdown content from the processed data
+            markdowns = extract_markdowns("tree_output_temp.json")
+            
+            # Add the extracted markdowns to files to process
+            if markdowns:
+                # Create temporary files from the markdowns
+                for i, markdown in enumerate(markdowns):
+                    temp_file = f"website_content_{i}.md"
+                    with open(temp_file, 'w', encoding='utf-8') as f:
+                        f.write(markdown)
+                    files_to_process.append(temp_file)
+                logger.info(f"Added {len(markdowns)} markdown files from website crawling")
 
-        await call_crawler(website_url, "crawl_json_temp.json")
-        new_file = remove_header_footer("crawl_json_temp.json")
-
-        create_tree_from_json("crawl_json_temp.json", "tree_output_temp.json")
-
-        with open("tree_output_temp.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
-        markdown_text = extract_markdowns(data)
-
-        temp_file = tempfile.NamedTemporaryFile(mode='w+t', suffix=".txt", delete=False, encoding='utf-8')
-        temp_file.write("\n\n".join(markdown_text))
-        temp_file.flush()
-        temp_file_path = temp_file.name
-        logger.info(f"Website content saved to temporary file: {temp_file_path}")
-        files_to_process.append(temp_file)
-
-    except Exception as e:
-        logger.error(f"Error during website processing: {e}")
-        return None
+        except Exception as e:
+            logger.error(f"Error during website processing: {e}")
+            # Don't return None, continue with file processing if available
 
     if files_to_process:
         logger.info("Processing documents and creating vector database...")
@@ -91,17 +93,32 @@ async def create_vector_db_from_config(website_url: Optional[str], files: List[U
         else:
             logger.warning("Vector database creation failed, not saving to disk.")
 
-        if website_url:
-            temp_file.close()
-            os.remove(temp_file.name)
-            os.remove("tree_output_temp.json")
-            os.remove("crawl_json_temp.json")
-            logger.info(f"Temporary website file cleaned up: {temp_file.name}")
+        # Clean up temporary files
+        import glob
+        temp_files = glob.glob("crawl_json_temp.json") + glob.glob("tree_output_temp.json") + glob.glob("website_content_*.md")
+        for temp_file in temp_files:
+            try:
+                os.remove(temp_file)
+            except FileNotFoundError:
+                pass
 
         return vector_db
     else:
-        logger.warning("No website URL or documents provided.")
-        return None
+        logger.warning("No website URL processing available and no files provided.")
+        # For now, create a basic vector DB even without content
+        # This allows the bot to be created even if crawling is disabled
+        vector_db_path = os.path.join("vector_db_storage", bot_id)
+        
+        # Create empty temp file as placeholder
+        temp_file = tempfile.NamedTemporaryFile(mode='w+t', suffix=".txt", delete=False, encoding='utf-8')
+        temp_file.write("Bot created successfully. Website crawling is currently disabled.")
+        temp_file.flush()
+        temp_file.close()
+        
+        vector_db = process_documents_and_create_db([temp_file.name], persist_directory=vector_db_path)
+        os.remove(temp_file.name)
+        
+        return vector_db
 
 @app.post("/create_bot/")
 async def create_bot_endpoint(

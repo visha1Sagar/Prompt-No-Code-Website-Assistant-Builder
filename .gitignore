@@ -4,6 +4,8 @@
 */__pycache__/
 /faiss_index
 scrapped_text.txt
+vector_db_storage/
+crawl_json_temp.json
 tree_output.json
 crawl_results.json
 crawl_results_cleaned.json
