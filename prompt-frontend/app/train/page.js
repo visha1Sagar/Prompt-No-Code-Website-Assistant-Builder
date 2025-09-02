@@ -23,60 +23,71 @@ import config from "@/lib/config";
 export default function TrainPage() {
   const [activeTab, setActiveTab] = useState("upload");
   return (
-    <div className="p-6 h-screen bg-gray-100">
-      <div className="flex bg-gray-100 max-w-5xl mx-auto">
-        {/* Sidebar */}
-        <aside className="w-80 p-5">
-          <h2 className="text-xl font-semibold mb-6">Train</h2>
-          <nav className="space-y-2">
-            <NavItem
+    <div className="min-h-screen bg-gray-50">
+      {/* Header with horizontal tabs */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Train</h1>
+          <nav className="flex space-x-8">
+            <TabItem
               icon={<Upload size={18} />}
               label="Website Link and File Upload"
               active={activeTab === "upload"}
               onClick={() => setActiveTab("upload")}
             />
-            <NavItem
+            <TabItem
               icon={<Database size={18} />}
-              label="SQL Database Connection(in progress)"
+              label="SQL Database Connection"
+              disabled={true}
               active={activeTab === "sql"}
               onClick={() => setActiveTab("sql")}
             />
-            <NavItem
+            <TabItem
               icon={<Bot size={18} />}
               label="AI Models Management"
               active={activeTab === "models"}
               onClick={() => setActiveTab("models")}
             />
           </nav>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1">
-          {activeTab === "upload" ? (
-            <UploadFiles />
-          ) : activeTab === "sql" ? (
-            <SQLConnection />
-          ) : (
-            <ModelsManagement />
-          )}
-        </main>
+        </div>
       </div>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        {activeTab === "upload" ? (
+          <UploadFiles />
+        ) : activeTab === "sql" ? (
+          <SQLConnection />
+        ) : (
+          <ModelsManagement />
+        )}
+      </main>
     </div>
   );
 }
 
-// Sidebar Item Component
-const NavItem = ({ icon, label, active, onClick }) => {
+// Tab Item Component
+const TabItem = ({ icon, label, active, disabled, onClick }) => {
   return (
-    <div
-      className={`flex items-center p-3 cursor-pointer rounded-md transition ${
-        active ? "bg-gray-200 font-medium" : "hover:bg-gray-100"
+    <button
+      className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+        disabled 
+          ? "text-gray-400 cursor-not-allowed" 
+          : active 
+            ? "bg-blue-50 text-blue-700 border border-blue-200" 
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
       }`}
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
     >
-      {icon}
-      <span className="ml-3">{label}</span>
-    </div>
+      <span className={disabled ? "text-gray-300" : active ? "text-blue-600" : "text-gray-500"}>
+        {icon}
+      </span>
+      <span className="whitespace-nowrap">
+        {label}
+        {disabled && <span className="text-xs ml-2 text-gray-400">(in progress)</span>}
+      </span>
+    </button>
   );
 };
 
@@ -181,7 +192,7 @@ const UploadFiles = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
+    <div className="max-w-4xl space-y-6">
       {/* Main Card */}
       <Card>
         <CardHeader className="text-lg font-semibold">
@@ -472,7 +483,7 @@ const ModelsManagement = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
+    <div className="space-y-6">
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-4">
           <div className="flex items-start justify-between">
