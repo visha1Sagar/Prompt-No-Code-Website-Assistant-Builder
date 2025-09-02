@@ -49,6 +49,7 @@ class QueryBotRequest(BaseModel):
     bot_id: str
     query: str
     context: str
+    model: Optional[dict] = None  # {provider: str, model_name: str, api_key: str}
 
 async def create_vector_db_from_config(website_url: Optional[str], files: List[UploadFile], bot_id: str) -> Optional[Chroma]:
     files_to_process = list(files or [])
@@ -121,6 +122,7 @@ async def query_bot_endpoint(request: QueryBotRequest):
     bot_id = request.bot_id
     query = request.query
     context = request.context
+    model_info = request.model
 
     vector_db = cached_vector_database(bot_id)
     if not vector_db:
@@ -129,7 +131,7 @@ async def query_bot_endpoint(request: QueryBotRequest):
     response = query_vector_database(vector_db, context + "\n" + query)
 
     if response:
-        answer = formulate_answer(query, response, context)
+        answer = formulate_answer(query, response, context, model_info)
         return {"answer": answer}
     else:
         return {"answer": "No relevant information found in the bot's documents for your query."}

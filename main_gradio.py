@@ -30,10 +30,10 @@ def test_sql_connection(host, database, username, password):
     except Exception as e:
         return f"Error testing SQL Connection: {e}"
 
-def formulate_answer(query, context_chunks, context):
+def formulate_answer(query, context_chunks, context, model_info=None):
     print("for query: ", query, "\ncontext: ", context_chunks)
     """
-    Formulates an answer using OpenAI GPT based on the query and retrieved context chunks.
+    Formulates an answer using the specified LLM based on the query and retrieved context chunks.
     """
     if not context_chunks:
         return "I'm sorry, I couldn't find relevant information in the documents for your query."
@@ -54,16 +54,39 @@ def formulate_answer(query, context_chunks, context):
 
     try:
         messages = [
-
-        ("system",
-        "You're a Website Assitant. Answer the question below based on the provided context. Be concise and helpful.",),
-         ("human", prompt),
+            ("system",
+            "You're a Website Assistant. Answer the question below based on the provided context. Be concise and helpful."),
+            ("human", prompt),
         ]
-        llm = ChatOpenAI(model="gpt-4o-mini") # Requires OPENAI_API_KEY environment variable
+        
+        # Use the selected model if provided, otherwise fall back to default
+        if model_info and model_info.get('provider') == 'openai':
+            from langchain_openai import ChatOpenAI
+            llm = ChatOpenAI(
+                model=model_info.get('model_name', 'gpt-4o-mini'),
+                api_key=model_info.get('api_key')
+            )
+        elif model_info and model_info.get('provider') == 'gemini':
+            try:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+                llm = ChatGoogleGenerativeAI(
+                    model=model_info.get('model_name', 'gemini-1.5-flash'),
+                    google_api_key=model_info.get('api_key')
+                )
+            except ImportError:
+                print("Google GenAI not installed. Install with: pip install langchain-google-genai")
+                # Fallback to OpenAI
+                from langchain_openai import ChatOpenAI
+                llm = ChatOpenAI(model="gpt-4o-mini")
+        else:
+            # Fallback to default OpenAI model
+            from langchain_openai import ChatOpenAI
+            llm = ChatOpenAI(model="gpt-4o-mini")
+        
         response = llm.invoke(messages)
-        return response.content.strip() # Return GPT answer, removing leading/trailing whitespace
+        return response.content.strip() # Return LLM answer, removing leading/trailing whitespace
     except Exception as e:
-        print(f"Error during answer formulation with OpenAI: {e}")
+        print(f"Error during answer formulation with LLM: {e}")
         return "I encountered an error while trying to formulate an answer. Please try again later."
 
 
@@ -77,7 +100,7 @@ def chatbot_response(query):
     relevant_chunks = query_vector_database(vector_db, query) # Search vector DB using query_vector_database from document_handler
 
     if relevant_chunks:
-        answer = formulate_answer(query, relevant_chunks, "") # Formulate answer using GPT and retrieved chunks
+        answer = formulate_answer(query, relevant_chunks, "", None) # Formulate answer using default model for Gradio interface
         return answer
     else:
         return "I'm sorry, I couldn't find relevant information in the documents for your query."
