@@ -10,11 +10,6 @@ dotenv.load_dotenv('.env')
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
-
-# Ensure OpenAI API key is loaded from environment
-openai_api_key = os.getenv('OPENAI_API_KEY')
-if not openai_api_key:
-    raise ValueError("OPENAI_API_KEY not found in environment variables. Please add your OpenAI API key to the .env file.")
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_experimental.text_splitter import SemanticChunker
 import logging
@@ -40,10 +35,10 @@ def load_document(file_path: str) -> List[Document]:
         return []
     return loader.load()
 
-def chunk_documents(documents: List[Document], strategy: str = "recursive") -> List[Document]:
+def chunk_documents(documents: List[Document], strategy: str = "semantic") -> List[Document]:
     """Enhanced chunking with multiple strategies"""
-    # Use recursive chunking by default instead of semantic to avoid OpenAI dependency
     chunkers = {
+        "semantic": SemanticChunker(OpenAIEmbeddings()),
         "recursive": RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
@@ -63,7 +58,7 @@ def chunk_documents(documents: List[Document], strategy: str = "recursive") -> L
         try:
             if strategy == "auto":
                 content_type = doc.metadata.get('content_type', 'text')
-                chunker = chunkers["markdown" if content_type == "markdown" else "recursive"]
+                chunker = chunkers["markdown" if content_type == "markdown" else "semantic"]
             else:
                 chunker = chunkers[strategy]
 
@@ -83,7 +78,7 @@ def chunk_documents(documents: List[Document], strategy: str = "recursive") -> L
 
 def create_vector_database_from_documents(chunks, persist_directory) -> Chroma:
     """Creates and saves a Chroma vector database from text chunks."""
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    embeddings = OpenAIEmbeddings()
     vector_db = Chroma.from_documents(documents=chunks, embedding=embeddings, persist_directory=persist_directory)
     return vector_db
 
@@ -99,7 +94,7 @@ def save_vector_database(vector_db, persist_directory):
 
 def load_vector_database(persist_directory) -> Optional[Chroma]:
     """Loads Chroma vector database from disk from a specific directory."""
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    embeddings = OpenAIEmbeddings()
     try:
         vector_db = Chroma(persist_directory=persist_directory, embedding_function=embeddings)
         logger.info(f"Vector database loaded from: {persist_directory}")
@@ -108,7 +103,7 @@ def load_vector_database(persist_directory) -> Optional[Chroma]:
         logger.error(f"Error loading vector database from {persist_directory}: {e}")
         return None
 
-def process_documents_and_create_db(files, persist_directory=None, chunk_strategy: str = "recursive") -> Optional[Chroma]:
+def process_documents_and_create_db(files, persist_directory=None, chunk_strategy: str = "semantic") -> Optional[Chroma]:
     """Processes document files, chunks them, and creates/saves a vector database."""
     documents = []
     if not files:

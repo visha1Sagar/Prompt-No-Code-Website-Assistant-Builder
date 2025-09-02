@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
+import { X, Settings, Bot } from "lucide-react";
 import config from "@/lib/config";
 
 export default function ChatScreen({
@@ -15,11 +15,41 @@ export default function ChatScreen({
   chatIconBg,
   profileImage,
   displayName,
+  selectedModel,
+  availableModels,
   onClose,
 }) {
   const [messages, setMessages] = useState([{ text: welcomeMessage, sender: "bot" }]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [currentModel, setCurrentModel] = useState(selectedModel);
+  const [showModelSelector, setShowModelSelector] = useState(false);
+
+  useEffect(() => {
+    setCurrentModel(selectedModel);
+  }, [selectedModel]);
+
+  const getAllAvailableModels = () => {
+    if (!availableModels || availableModels.length === 0) return [];
+    const allModels = [];
+    availableModels.forEach(provider => {
+      provider.models.forEach((model, index) => {
+        allModels.push({
+          id: `${provider.id}-${model}-${index}`,
+          name: model,
+          provider: provider.provider,
+          providerName: provider.name,
+          apiKey: provider.apiKey
+        });
+      });
+    });
+    return allModels;
+  };
+
+  const getCurrentModelInfo = () => {
+    const allModels = getAllAvailableModels();
+    return allModels.find(m => m.id === currentModel);
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -28,13 +58,22 @@ export default function ChatScreen({
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
+
+    // Get the current model info for API request
+    const modelInfo = getCurrentModelInfo();
+    
     const response = await fetch(`${config.backendUrl}/query_bot/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         "bot_id": localStorage.getItem("bot_id"),
         "query": input,
-        "context":context
+        "context": context,
+        "model": modelInfo ? {
+          provider: modelInfo.provider,
+          model_name: modelInfo.name,
+          api_key: modelInfo.apiKey
+        } : null
       }),
     });
 
@@ -53,7 +92,7 @@ export default function ChatScreen({
   return (
     <Card className="fixed bottom-10 right-10 w-96 h-[500px] shadow-lg rounded-lg flex flex-col overflow-hidden">
       <CardHeader className="flex items-center flex-row justify-between p-4" style={{ backgroundColor: accentColor }}>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
           {profileImage ? (
             <img src={profileImage} alt="Chatbot" className="w-10 h-10 rounded-full" />
           ) : (
@@ -61,12 +100,49 @@ export default function ChatScreen({
                 {"C"}
             </div>
           )}
-          <CardTitle className="text-white">{displayName || "C"}</CardTitle>
+          <div className="flex-1">
+            <CardTitle className="text-white text-sm">{displayName || "C"}</CardTitle>
+            {getCurrentModelInfo() && (
+              <p className="text-white/80 text-xs">
+                {getCurrentModelInfo().name}
+              </p>
+            )}
+          </div>
         </div>
-        <button variant="ghost" size="icon" onClick={onClose}>
-          <X className="text-white" />
-        </button>
+        <div className="flex items-center gap-2">
+          {availableModels.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowModelSelector(!showModelSelector)}
+              className="text-white hover:bg-white/20 p-1"
+            >
+              <Settings size={16} />
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20 p-1">
+            <X size={16} />
+          </Button>
+        </div>
       </CardHeader>
+
+      {/* Model Selector */}
+      {showModelSelector && availableModels.length > 0 && (
+        <div className="p-3 border-b bg-gray-50">
+          <div className="text-sm font-medium mb-2">Select AI Model:</div>
+          <select
+            value={currentModel}
+            onChange={(e) => setCurrentModel(e.target.value)}
+            className="w-full p-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {getAllAvailableModels().map((model) => (
+              <option key={model.id} value={model.id}>
+                {model.name} ({model.providerName})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <CardContent className="flex-1 p-4 overflow-y-auto space-y-2">
         {messages.map((msg, index) => (

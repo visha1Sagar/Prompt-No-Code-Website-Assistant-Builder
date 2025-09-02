@@ -8,6 +8,10 @@ import {
   Clipboard,
   Check,
   Loader,
+  Bot,
+  Plus,
+  Eye,
+  EyeOff,
 } from "lucide-react"; // Icons
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,16 +37,28 @@ export default function TrainPage() {
             />
             <NavItem
               icon={<Database size={18} />}
-              label="SQL Database Connection"
+              label="SQL Database Connection(in progress)"
               active={activeTab === "sql"}
               onClick={() => setActiveTab("sql")}
+            />
+            <NavItem
+              icon={<Bot size={18} />}
+              label="AI Models Management"
+              active={activeTab === "models"}
+              onClick={() => setActiveTab("models")}
             />
           </nav>
         </aside>
 
         {/* Main Content */}
         <main className="flex-1">
-          {activeTab === "upload" ? <UploadFiles /> : <SQLConnection />}
+          {activeTab === "upload" ? (
+            <UploadFiles />
+          ) : activeTab === "sql" ? (
+            <SQLConnection />
+          ) : (
+            <ModelsManagement />
+          )}
         </main>
       </div>
     </div>
@@ -82,6 +98,18 @@ const UploadFiles = () => {
   };
 
   const handleFileUpload = (event) => {
+    // Check if any AI models are configured
+    const savedModels = localStorage.getItem('aiModels');
+    const models = savedModels ? JSON.parse(savedModels) : [];
+    
+    if (models.length === 0) {
+      setErrors((prev) => ({
+        ...prev,
+        files: "Please add at least one AI model first. Go to the 'AI Models Management' tab to configure your API keys.",
+      }));
+      return;
+    }
+
     const selectedFiles = Array.from(event.target.files || []);
     const filteredFiles = selectedFiles.filter((file) =>
       ["application/pdf", "text/plain"].includes(file.type)
@@ -106,6 +134,16 @@ const UploadFiles = () => {
 
   const handleSave = async () => {
     let newErrors = { website: "" };
+
+    // Check if any AI models are configured
+    const savedModels = localStorage.getItem('aiModels');
+    const models = savedModels ? JSON.parse(savedModels) : [];
+    
+    if (models.length === 0) {
+      newErrors.website = "Please add at least one AI model first. Go to the 'AI Models Management' tab to configure your API keys.";
+      setErrors(newErrors);
+      return;
+    }
 
     if (!website.trim()) {
       newErrors.website = "Website URL is required.";
@@ -337,5 +375,319 @@ const SQLConnection = () => {
         <Button className="w-full bg-[#1e2b3b] text-white">Save</Button>
       </CardContent>
     </Card>
+  );
+};
+
+// Models Management Component
+const ModelsManagement = () => {
+  const [models, setModels] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('aiModels');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newModel, setNewModel] = useState({
+    provider: '',
+    apiKey: '',
+    name: ''
+  });
+  const [showApiKeys, setShowApiKeys] = useState({});
+  const [primaryModel, setPrimaryModel] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('primaryModel') || '';
+    }
+    return '';
+  });
+
+  const providerOptions = {
+    openai: {
+      name: 'OpenAI',
+      models: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+      placeholder: 'sk-...'
+    },
+    gemini: {
+      name: 'Google Gemini',
+      models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-pro'],
+      placeholder: 'AIza...'
+    }
+  };
+
+  const handleAddModel = () => {
+    if (!newModel.provider || !newModel.apiKey || !newModel.name) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    const modelData = {
+      id: Date.now().toString(),
+      provider: newModel.provider,
+      apiKey: newModel.apiKey,
+      name: newModel.name,
+      models: providerOptions[newModel.provider].models,
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedModels = [...models, modelData];
+    setModels(updatedModels);
+    localStorage.setItem('aiModels', JSON.stringify(updatedModels));
+    
+    setNewModel({ provider: '', apiKey: '', name: '' });
+    setShowAddForm(false);
+  };
+
+  const handleDeleteModel = (id) => {
+    if (window.confirm('Are you sure you want to delete this model configuration?')) {
+      const updatedModels = models.filter(model => model.id !== id);
+      setModels(updatedModels);
+      localStorage.setItem('aiModels', JSON.stringify(updatedModels));
+      
+      // Clear primary model if the deleted model was primary
+      if (primaryModel === id) {
+        setPrimaryModel('');
+        localStorage.setItem('primaryModel', '');
+      }
+    }
+  };
+
+  const toggleApiKeyVisibility = (id) => {
+    setShowApiKeys(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const handleSetPrimary = (id) => {
+    const newPrimary = primaryModel === id ? '' : id;
+    setPrimaryModel(newPrimary);
+    localStorage.setItem('primaryModel', newPrimary);
+  };
+
+  const maskApiKey = (apiKey) => {
+    if (apiKey.length <= 8) return '*'.repeat(apiKey.length);
+    // Show first 4 and last 4 characters, with limited asterisks in between
+    const maskedLength = Math.min(12, apiKey.length - 8); // Limit to 12 asterisks max
+    return apiKey.substring(0, 4) + '*'.repeat(maskedLength) + apiKey.substring(apiKey.length - 4);
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto p-6 space-y-6">
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">AI Models Management</h2>
+              <p className="text-gray-600 mt-1">
+                Manage your AI model providers and API keys for the chatbot
+              </p>
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-blue-700 text-sm flex items-center gap-2">
+                  <span className="text-blue-500">📌</span>
+                  <strong>Note:</strong> The primary model will be used for generating embeddings and as the default model
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={() => setShowAddForm(true)}
+              className="bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 px-4 py-2"
+            >
+              <Plus size={16} />
+              Add Model
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {models.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <Bot size={32} className="text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No AI models configured</h3>
+              <p className="text-gray-500 mb-4">Add your first model to get started with the chatbot</p>
+              <Button
+                onClick={() => setShowAddForm(true)}
+                className="bg-gray-900 hover:bg-gray-800 text-white"
+              >
+                <Plus size={16} className="mr-2" />
+                Add Your First Model
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {models.map((model) => (
+                <Card key={model.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        {/* Header with name, provider, and primary badge */}
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                            <Bot size={18} className="text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold text-gray-900">{model.name}</h3>
+                              {primaryModel === model.id && (
+                                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium border border-emerald-200">
+                                  PRIMARY
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-500">
+                              {providerOptions[model.provider]?.name || model.provider}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* API Key section */}
+                        <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Label className="text-xs font-medium text-gray-600 uppercase tracking-wide">API Key</Label>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleApiKeyVisibility(model.id)}
+                              className="p-0 h-5 w-5 text-gray-400 hover:text-gray-600"
+                            >
+                              {showApiKeys[model.id] ? <EyeOff size={12} /> : <Eye size={12} />}
+                            </Button>
+                          </div>
+                          <code className="text-sm text-gray-800 font-mono">
+                            {showApiKeys[model.id] ? model.apiKey : maskApiKey(model.apiKey)}
+                          </code>
+                        </div>
+
+                        {/* Available models */}
+                        <div>
+                          <Label className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2 block">
+                            Available Models ({model.models.length})
+                          </Label>
+                          <div className="flex flex-wrap gap-1.5">
+                            {model.models.map((modelName, index) => (
+                              <span
+                                key={`${model.id}-${modelName}-${index}`}
+                                className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md border border-blue-200 font-medium"
+                              >
+                                {modelName}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex flex-col gap-2 ml-4">
+                        <Button
+                          variant={primaryModel === model.id ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleSetPrimary(model.id)}
+                          className={primaryModel === model.id 
+                            ? "text-white bg-emerald-600 hover:bg-emerald-700 border-emerald-600" 
+                            : "text-emerald-600 border-emerald-300 hover:bg-emerald-50 hover:border-emerald-400"
+                          }
+                        >
+                          {primaryModel === model.id ? "Primary" : "Set Primary"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteModel(model.id)}
+                          className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Add Model Form */}
+      {showAddForm && (
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-semibold">Add New AI Model</h3>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="provider">Provider</Label>
+              <select
+                id="provider"
+                value={newModel.provider}
+                onChange={(e) => setNewModel(prev => ({ ...prev, provider: e.target.value }))}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select a provider</option>
+                {Object.entries(providerOptions).map(([key, option]) => (
+                  <option key={key} value={key}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <Label htmlFor="modelName">Configuration Name</Label>
+              <Input
+                id="modelName"
+                value={newModel.name}
+                onChange={(e) => setNewModel(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., My OpenAI Account"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="apiKey">API Key</Label>
+              <Input
+                id="apiKey"
+                type="password"
+                value={newModel.apiKey}
+                onChange={(e) => setNewModel(prev => ({ ...prev, apiKey: e.target.value }))}
+                placeholder={newModel.provider ? providerOptions[newModel.provider].placeholder : 'Enter your API key'}
+              />
+            </div>
+
+            {newModel.provider && (
+              <div>
+                <Label>Available Models</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {providerOptions[newModel.provider].models.map((modelName, index) => (
+                    <span
+                      key={`${newModel.provider}-${modelName}-${index}`}
+                      className="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full"
+                    >
+                      {modelName}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Button
+                onClick={handleAddModel}
+                className="bg-[#1e2b3b] text-white"
+              >
+                Add Model
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddForm(false);
+                  setNewModel({ provider: '', apiKey: '', name: '' });
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +29,38 @@ export default function Playground() {
   const [chatIconBg, setChatIconBg] = useState("#1C2454");
   const [profileImage, setProfileImage] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [availableModels, setAvailableModels] = useState([]);
+  const [selectedModel, setSelectedModel] = useState('');
+
+  useEffect(() => {
+    // Load available models from localStorage
+    const savedModels = localStorage.getItem('aiModels');
+    if (savedModels) {
+      const models = JSON.parse(savedModels);
+      setAvailableModels(models);
+      if (models.length > 0) {
+        setSelectedModel(`${models[0].id}-${models[0].models[0]}-0`);
+      }
+    }
+  }, []);
+
+  const getAllAvailableModels = () => {
+    const allModels = [];
+    availableModels.forEach(provider => {
+      provider.models.forEach((model, index) => {
+        allModels.push({
+          id: `${provider.id}-${model}-${index}`,
+          name: model,
+          provider: provider.provider,
+          providerName: provider.name,
+          apiKey: provider.apiKey,
+          providerId: provider.id
+        });
+      });
+    });
+    return allModels;
+  };
+
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -198,6 +230,8 @@ export default function Playground() {
                     chatIconBg={chatIconBg}
                     profileImage={profileImage}
                     displayName = {displayName}
+                    selectedModel={selectedModel}
+                    availableModels={availableModels}
                     onClose={() => setIsOpen(false)}
                   />
       </div>
