@@ -177,8 +177,6 @@ def process_documents_and_create_db(files, persist_directory=None, chunk_strateg
                 file_extension = os.path.splitext(file.filename)[1].lower()
                 
                 with tempfile.NamedTemporaryFile(mode='wb+', suffix=file_extension, delete=False) as temp_file:
-                    # For UploadFile, read from the underlying file directly
-                    file.file.seek(0)  # Reset position
                     content = file.file.read()
                     temp_file.write(content)
                     temp_file.flush()

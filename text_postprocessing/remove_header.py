@@ -9,24 +9,27 @@ def generate_regex(file_name, max_attempts=3):
     with open(file_name, "r", encoding="utf-8") as f:
         crawl_results = json.load(f)
 
-    markdown_pages = [page["markdown"] for page in crawl_results["pages"].values()]
+    markdown_pages = [page["markdown"] for page in crawl_results["pages"].values() if page.get("markdown", "").strip()]
+    
+    # Check if we have enough pages to generate regex
+    if len(markdown_pages) == 0:
+        print("No markdown pages found to analyze. Skipping regex generation.")
+        return None
+    
+    # Create page examples based on available pages
+    page_examples = ""
+    for i, page in enumerate(markdown_pages[:3]):  # Use up to 3 pages
+        page_examples += f"""
+    ---
+    ### Page {i+1}:
+    {page[:1000]}...  
+    """  # Limit each page to 1000 chars to avoid token limits
     
     prompt = f"""
     I have extracted multiple Markdown pages from a website, and I want to remove the header while keeping the main content intact.
 
     Here are examples of Markdown pages:
-
-    ---
-    ### Page 1:
-    {markdown_pages[0]}
-
-    ---
-    ### Page 2:
-    {markdown_pages[1]}
-
-    ---
-    ### Page 3:
-    {markdown_pages[2]}
+    {page_examples}
 
     ---
 
@@ -44,45 +47,7 @@ def generate_regex(file_name, max_attempts=3):
 
     Please provide **only** the final regex in the json format:
     ```json
-        `regex`: 'your_regex_here'
-    ```
-
-    without the ''' or ``` code blocks.
-    """
-    prompt = f"""
-    I have extracted multiple Markdown pages from a website, and I want to remove the header while keeping the main content intact.
-
-    Here are examples of Markdown pages:
-
-    ---
-    ### Page 1:
-    {markdown_pages[0]}
-
-    ---
-    ### Page 2:
-    {markdown_pages[1]}
-
-    ---
-    ### Page 3:
-    {markdown_pages[2]}
-
-    ---
-
-    ### Task:
-    1. Analyze the pattern in the headers across all these pages.
-    2. Identify where the **main content begins**, typically at the **first Markdown heading (`#`, `##`, `###`, etc.)**.
-    3. Generate a **generalized Python regex (`re` module)** that can remove such headers from any similar Markdown page.
-
-    ### Requirements:
-    - The regex should work **dynamically** for different Markdown pages.
-    - It should **remove everything before the first Markdown heading** (e.g., `# Title`, `## Section`, `### Heading`).
-    - The regex must be formatted in **Python `re` syntax**, ready for use in `re.sub()`.
-    - **Do NOT hardcode any specific phrase**—it must work for different documents.
-    - You MUST not give ``` jsons or code blocks in the response.
-
-    Please provide **only** the final regex in the json format:
-    ```json
-        `regex`: 'your_regex_here'
+        "regex": "your_regex_here"
     ```
 
     without the ''' or ``` code blocks.
@@ -92,15 +57,21 @@ def generate_regex(file_name, max_attempts=3):
     while attempts < max_attempts:
         try:
             output = ask_openai(prompt, 1000)
-            output = ast.literal_eval(output)
-            regex = output["regex"]
+            # Try to parse JSON first, then fallback to ast.literal_eval
+            try:
+                import json as json_module
+                output_dict = json_module.loads(output)
+            except json_module.JSONDecodeError:
+                output_dict = ast.literal_eval(output)
+            
+            regex = output_dict["regex"]
             
             # Test if regex is valid
             re.compile(regex)
             print(f"Generated regex (attempt {attempts + 1}): {regex}")
             return regex  # Return valid regex if successful
-        except (re.error, SyntaxError, ValueError) as e:
-            print(f"Attempt {attempts + 1} failed due to invalid regex. Retrying...")
+        except (re.error, SyntaxError, ValueError, KeyError) as e:
+            print(f"Attempt {attempts + 1} failed due to invalid regex or parsing error: {e}. Retrying...")
             attempts += 1
     
     print("Max attempts reached. Skipping regex application.")

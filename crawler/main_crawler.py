@@ -5,7 +5,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
-import fitz
+import PyPDF2
 from io import BytesIO
 import traceback
 
@@ -15,15 +15,18 @@ def extract_pdf_text(url):
         response = requests.get(url)
         response.raise_for_status()  # Raise error for bad HTTP response
 
-        # Read PDF in memory
-        pdf_document = fitz.open(stream=BytesIO(response.content), filetype="pdf")
+        # Read PDF in memory using PyPDF2
+        pdf_file = BytesIO(response.content)
+        pdf_reader = PyPDF2.PdfReader(pdf_file)
 
         # Check if PDF is encrypted
-        if pdf_document.is_encrypted:
-            pdf_document.authenticate("")  # Try unlocking
+        if pdf_reader.is_encrypted:
+            pdf_reader.decrypt("")  # Try unlocking
 
         # Extract text safely
-        text = "\n".join([page.get_text("text") for page in pdf_document])
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text() + "\n"
 
         if not text.strip():  # Check if text extraction failed (PDF might be scanned)
             text = ""
@@ -33,11 +36,9 @@ def extract_pdf_text(url):
     except requests.exceptions.RequestException as e:
         print(f"Network Error: {e}")
         traceback.print_exc()  # Print full error details
-    except fitz.FileDataError as e:
-        print("PDF file is corrupted or cannot be read.")
-        traceback.print_exc()
     except Exception as e:
         print(f"Unexpected error: {e}")
+        traceback.print_exc()  # Print full error details
         traceback.print_exc()
 
 # Define your markdown generator.
@@ -106,15 +107,28 @@ async def crawl_page(crawler, url, base_domain, depth, max_depth, visited, pages
         # For text-based pages, try to extract markdown.
         markdown_content = ""
         try:
-            # Prefer the raw markdown from markdown_v2 if available.
-            if result.markdown_v2 and result.markdown_v2.raw_markdown:
-                markdown_content = result.markdown_v2.raw_markdown
-            elif result.markdown:
-                markdown_content = result.markdown
+            # Use the current markdown attribute which returns a MarkdownGenerationResult
+            if hasattr(result, 'markdown') and result.markdown:
+                # Check if it's the new MarkdownGenerationResult object
+                if hasattr(result.markdown, 'raw_markdown'):
+                    markdown_content = result.markdown.raw_markdown
+                elif isinstance(result.markdown, str):
+                    markdown_content = result.markdown
+                else:
+                    # Fallback to string representation
+                    markdown_content = str(result.markdown)
             else:
                 print(f"No markdown available for {url}.")
         except Exception as e:
             print(f"Error processing markdown for {url}: {e}")
+            # Try to get basic text content as fallback
+            try:
+                if hasattr(result, 'cleaned_html'):
+                    markdown_content = result.cleaned_html
+                elif hasattr(result, 'html'):
+                    markdown_content = result.html
+            except Exception as fallback_e:
+                print(f"Fallback content extraction also failed for {url}: {fallback_e}")
         
         # Remove image markdown syntax if content is available.
         if markdown_content:

@@ -67,19 +67,30 @@ def extract_markdowns(data):
     def traverse(node):
         if isinstance(node, dict):
             content = []
-            if "markdowns" in node:
-                content.extend(node["markdowns"])  # Collect markdown content first
-            if "urls" in node:  # Ensure 'urls' exist and append them immediately after their content
+            if "markdowns" in node and node["markdowns"]:
+                # Filter out empty or whitespace-only markdown content
+                valid_markdowns = [md for md in node["markdowns"] if md and md.strip()]
+                content.extend(valid_markdowns)
+            
+            if "urls" in node and node["urls"]:
                 content.extend(node["urls"])
             
             if content:
-                markdowns.append(" ".join(content))  # Join content and URLs without extra spacing
+                joined_content = " ".join(content).strip()
+                if joined_content:  # Only add non-empty content
+                    markdowns.append(joined_content)
             
-            for key in node:
-                traverse(node[key])
+            # Recursively traverse children
+            for key, value in node.items():
+                if key not in ["markdowns", "urls"]:  # Skip the data fields we already processed
+                    traverse(value)
         elif isinstance(node, list):
             for item in node:
                 traverse(item)
 
     traverse(data)
+    
+    # Filter out any empty strings that might have been added
+    markdowns = [md for md in markdowns if md and md.strip()]
+    
     return markdowns

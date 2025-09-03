@@ -71,6 +71,11 @@ async def create_vector_db_from_config(website_url: Optional[str], files: List[U
             data = json.load(file)
         markdown_text = extract_markdowns(data)
 
+        # Check if we have any content to process
+        if not markdown_text:
+            logger.warning("No markdown content extracted from website")
+            markdown_text = ["No content could be extracted from the website."]
+
         temp_file = tempfile.NamedTemporaryFile(mode='w+t', suffix=".txt", delete=False, encoding='utf-8')
         temp_file.write("\n\n".join(markdown_text))
         temp_file.flush()
