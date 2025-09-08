@@ -1,0 +1,55 @@
+# Docker-compatible requirements (simplified)
+# Core web framework
+fastapi
+uvicorn[standard]
+python-multipart
+starlette
+
+# AI and LangChain
+openai
+langchain
+langchain-chroma
+langchain-community
+langchain-core
+langchain-openai
+langchain-text-splitters
+langchain-experimental
+
+# Vector database
+chromadb
+chroma-hnswlib
+
+# Document processing
+pypdf
+beautifulsoup4
+lxml
+PyMuPDF
+PyPDF2
+
+# Web crawling
+Crawl4AI
+aiohttp
+httpx
+playwright
+requests
+
+# Data processing
+pandas
+numpy
+scikit-learn
+
+# Environment and configuration
+python-dotenv
+pydantic
+pydantic-settings
+
+# Core utilities
+aiofiles
+click
+packaging
+
+# Database
+psycopg2-binary
+
+# Missing dependencies found in code
+sentence-transformers

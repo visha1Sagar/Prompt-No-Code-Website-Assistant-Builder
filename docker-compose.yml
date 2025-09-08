@@ -1,0 +1,43 @@
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: prompt-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./vector_db_storage:/app/vector_db_storage
+      # Remove source code mounting for production
+      # - .:/app  # Comment this out for production
+    environment:
+      - PYTHONPATH=/app
+      # Allow CORS for Vercel frontend
+      - CORS_ORIGINS=https://your-vercel-app.vercel.app,http://localhost:3000
+    env_file:
+      - .env
+    networks:
+      - prompt-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+networks:
+  prompt-network:
+    driver: bridge
+
+volumes:
+  vector_db_storage:

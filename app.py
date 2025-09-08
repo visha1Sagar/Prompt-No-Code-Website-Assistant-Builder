@@ -24,13 +24,23 @@ logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
 
-origins = ["*"]
+# CORS configuration for Vercel frontend
+origins = [
+    "http://localhost:3000",  # Local development
+    "https://*.vercel.app",   # Vercel deployments
+    # Add your specific Vercel URL here:
+    # "https://your-app-name.vercel.app",
+]
+
+# Allow all origins for development, but restrict in production
+if os.getenv("ENVIRONMENT") == "development":
+    origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -140,6 +150,11 @@ async def query_bot_endpoint(request: QueryBotRequest):
         return {"answer": answer}
     else:
         return {"answer": "No relevant information found in the bot's documents for your query."}
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Docker health checks"""
+    return {"status": "healthy", "message": "Service is running"}
 
 if __name__ == "__main__":
     import uvicorn

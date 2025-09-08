@@ -1,0 +1,45 @@
+# Backend Dockerfile
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user
+RUN useradd --create-home --shell /bin/bash app && \
+    chown -R app:app /app
+USER app
+
+# Copy requirements first for better caching
+# Copy requirements first for better caching
+    # Copy requirements and install dependencies
+    COPY --chown=app:app requirements-docker-simple.txt requirements.txt
+
+# Install Python dependencies
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# Add user pip packages to PATH
+ENV PATH="/home/app/.local/bin:${PATH}"
+
+# Copy the application code
+COPY --chown=app:app . .
+
+# Create directory for vector database storage
+RUN mkdir -p vector_db_storage
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Expose the port FastAPI runs on
+EXPOSE 8000
+
+# Command to run the application (remove --reload for production)
+CMD ["/home/app/.local/bin/uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
