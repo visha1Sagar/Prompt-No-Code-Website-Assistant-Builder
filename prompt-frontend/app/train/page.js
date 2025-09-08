@@ -174,7 +174,7 @@ const UploadFiles = () => {
       const response = await fetch(
         `${config.backendUrl}/create_bot/`,
         {
-          method: "POST",
+          method: "GET",
           body: formData,
         }
       );
