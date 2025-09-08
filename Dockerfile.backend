@@ -10,6 +10,20 @@ RUN apt-get update && apt-get install -y \
     g++ \
     libpq-dev \
     curl \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libxss1 \
+    libasound2 \
+    libatspi2.0-0 \
+    libgtk-3-0 \
+    libx11-xcb1 \
+    libxcb-dri3-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user
@@ -27,6 +41,12 @@ RUN pip install --user --no-cache-dir -r requirements.txt
 
 # Add user pip packages to PATH
 ENV PATH="/home/app/.local/bin:${PATH}"
+
+# Set Playwright environment variables for headless operation
+ENV PLAYWRIGHT_BROWSERS_PATH=/home/app/.cache/ms-playwright
+
+# Install Playwright browsers
+RUN playwright install chromium
 
 # Copy the application code
 COPY --chown=app:app . .

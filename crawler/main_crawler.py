@@ -163,9 +163,8 @@ async def call_crawler(start_url: str = "https://nust.edu.pk", output_file: str 
     visited = set()
     pages_data = {}  # This will map each URL to its details.
 
-    # Create a BrowserConfig with desired options.
-
-    # Pass the browser config using the 'browser_config' keyword.
+    # Use AsyncWebCrawler without explicit browser config for now
+    # The headless mode should be default in container environments
     async with AsyncWebCrawler() as crawler:
         print("Browser should launch now...")
         await crawl_page(crawler, start_url, base_domain, depth=0, max_depth=4, visited=visited, pages_data=pages_data)
