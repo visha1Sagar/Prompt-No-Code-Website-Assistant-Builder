@@ -70,7 +70,7 @@ def formulate_answer(query, context_chunks, context, model_info=None):
             try:
                 from langchain_google_genai import ChatGoogleGenerativeAI
                 llm = ChatGoogleGenerativeAI(
-                    model=model_info.get('model_name', 'gemini-1.5-flash'),
+                    model=model_info.get('model_name', 'gemini-2.5-flash'),
                     google_api_key=model_info.get('api_key')
                 )
             except ImportError:

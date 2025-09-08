@@ -14,6 +14,7 @@ langchain-core>=0.3.35
 langchain-openai>=0.3.5
 langchain-text-splitters>=0.3.6
 langchain-experimental>=0.3.4
+langchain-google-genai>=2.0.6
 
 # Vector database
 chromadb>=0.6.3
