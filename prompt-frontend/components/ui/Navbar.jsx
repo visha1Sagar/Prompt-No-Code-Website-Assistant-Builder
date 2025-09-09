@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu, User } from "lucide-react";
+import { Menu, Github } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Image from "next/image";
 
@@ -27,10 +27,18 @@ export default function Navbar() {
         </Link>
       </div>
 
-      {/* Right - User Account */}
+      {/* Right - GitHub Link */}
       <div className="hidden md:flex items-center">
-        <Button variant="ghost">
-          <User className="w-5 h-5" />
+        <Button variant="ghost" asChild>
+          <a 
+            href="https://github.com/visha1Sagar/Prompt-No-Code-Website-Assistant-Builder" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 hover:text-blue-600"
+          >
+            <Github className="w-5 h-5" />
+            <span className="hidden lg:inline">GitHub</span>
+          </a>
         </Button>
       </div>
 
@@ -57,6 +65,16 @@ export default function Navbar() {
             >
               Playground
             </Link>
+            <a
+              href="https://github.com/visha1Sagar/Prompt-No-Code-Website-Assistant-Builder"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-lg flex items-center gap-2 hover:text-blue-600"
+              onClick={() => setIsOpen(false)}
+            >
+              <Github className="w-5 h-5" />
+              GitHub
+            </a>
           </nav>
         </SheetContent>
       </Sheet>
