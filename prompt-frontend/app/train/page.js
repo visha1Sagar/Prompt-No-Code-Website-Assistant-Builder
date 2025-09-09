@@ -24,11 +24,12 @@ export default function TrainPage() {
   const [activeTab, setActiveTab] = useState("upload");
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with horizontal tabs */}
+      {/* Header with responsive tabs */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Train</h1>
-          <nav className="flex space-x-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Train</h1>
+          {/* Desktop tabs */}
+          <nav className="hidden lg:flex space-x-8">
             <TabItem
               icon={<Upload size={18} />}
               label="Website Link and File Upload"
@@ -49,11 +50,23 @@ export default function TrainPage() {
               onClick={() => setActiveTab("models")}
             />
           </nav>
+          {/* Mobile dropdown */}
+          <div className="lg:hidden">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="upload">Website Link and File Upload</option>
+              <option value="sql" disabled>SQL Database Connection (in progress)</option>
+              <option value="models">AI Models Management</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {activeTab === "upload" ? (
           <UploadFiles />
         ) : activeTab === "sql" ? (
@@ -70,7 +83,7 @@ export default function TrainPage() {
 const TabItem = ({ icon, label, active, disabled, onClick }) => {
   return (
     <button
-      className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+      className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
         disabled 
           ? "text-gray-400 cursor-not-allowed" 
           : active 
@@ -83,9 +96,9 @@ const TabItem = ({ icon, label, active, disabled, onClick }) => {
       <span className={disabled ? "text-gray-300" : active ? "text-blue-600" : "text-gray-500"}>
         {icon}
       </span>
-      <span className="whitespace-nowrap">
+      <span className="whitespace-nowrap text-xs sm:text-sm">
         {label}
-        {disabled && <span className="text-xs ml-2 text-gray-400">(in progress)</span>}
+        {disabled && <span className="text-xs ml-1 sm:ml-2 text-gray-400">(in progress)</span>}
       </span>
     </button>
   );
@@ -176,20 +189,20 @@ const UploadFiles = () => {
   };
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="w-full max-w-none space-y-4 sm:space-y-6">
       {/* Main Card */}
       <Card>
-        <CardHeader className="text-lg font-semibold">
+        <CardHeader className="text-base sm:text-lg font-semibold px-4 sm:px-6">
           Set Up Script Configuration
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 px-4 sm:px-6">
           <Card>
-            <CardHeader className="text-lg font-semibold">
+            <CardHeader className="text-base sm:text-lg font-semibold px-4 sm:px-6">
               Website Link
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 px-4 sm:px-6">
               <div>
-                <Label htmlFor="website">Website</Label>
+                <Label htmlFor="website" className="text-sm sm:text-base">Website</Label>
                 <div className="flex items-center space-x-2">
                   <Input
                     id="website"
@@ -198,10 +211,12 @@ const UploadFiles = () => {
                       setWebsite(e.target.value);
                       setErrors((prev) => ({ ...prev, website: "" }));
                     }}
+                    placeholder="https://example.com"
+                    className="text-sm sm:text-base"
                   />
                 </div>
                 {errors.website && (
-                  <p className="text-red-500 text-sm mt-1">{errors.website}</p>
+                  <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.website}</p>
                 )}
                 <p className="text-xs text-gray-500 mt-1">
                   Your bot will only work on websites with this domain name.
@@ -211,20 +226,20 @@ const UploadFiles = () => {
           </Card>
 
           <Card>
-            <CardHeader className="text-lg font-semibold">
+            <CardHeader className="text-base sm:text-lg font-semibold px-4 sm:px-6">
               Upload Files
-              <p className="text-gray-500 text-sm font-normal pt-1 ps-0.5">
+              <p className="text-gray-500 text-xs sm:text-sm font-normal pt-1 ps-0.5">
                 Upload your files to the knowledge base.
               </p>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 px-4 sm:px-6">
               {/* Drag & Drop Area */}
-              <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 p-10 rounded-lg cursor-pointer hover:bg-gray-50">
-                <UploadCloud size={40} className="text-gray-400" />
-                <p className="text-gray-700 font-medium">
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 p-6 sm:p-10 rounded-lg cursor-pointer hover:bg-gray-50">
+                <UploadCloud size={32} className="sm:w-10 sm:h-10 text-gray-400" />
+                <p className="text-gray-700 font-medium text-sm sm:text-base text-center">
                   Drag & drop files here, or click to select files
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs sm:text-sm text-gray-500 text-center">
                   Supported File Types:{" "}
                   <span className="text-blue-600">.pdf, .txt</span>
                 </p>
@@ -237,28 +252,28 @@ const UploadFiles = () => {
                 />
               </label>
               {errors.files && (
-                <p className="text-red-500 text-sm mt-1">{errors.files}</p>
+                <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.files}</p>
               )}
 
               {/* Uploaded Files List */}
               {files.length > 0 && (
                 <div>
-                  <p className="font-semibold">
+                  <p className="font-semibold text-sm sm:text-base">
                     Uploaded Files: {files.length}
                   </p>
                   <div className="mt-2 space-y-2">
                     {files.map((file, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-3 bg-gray-100 rounded-lg"
+                        className="flex items-center justify-between p-2 sm:p-3 bg-gray-100 rounded-lg"
                       >
-                        <span className="text-sm font-medium">{file.name}</span>
+                        <span className="text-xs sm:text-sm font-medium truncate flex-1 mr-2">{file.name}</span>
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => handleDelete(index)}
-                            className="text-red-600 hover:text-red-800"
+                            className="text-red-600 hover:text-red-800 p-1"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} className="sm:w-4 sm:h-4" />
                           </button>
                         </div>
                       </div>
@@ -271,13 +286,13 @@ const UploadFiles = () => {
 
           {/* Save Button with Loader */}
           <Button
-            className="w-full bg-[#1e2b3b] text-white flex items-center justify-center"
+            className="w-full bg-[#1e2b3b] text-white flex items-center justify-center text-sm sm:text-base"
             onClick={handleSave}
             disabled={loading} // Disable while loading
           >
             {loading ? (
               <>
-                <Loader className="animate-spin w-5 h-5 mr-2" /> Processing...
+                <Loader className="animate-spin w-4 h-4 sm:w-5 sm:h-5 mr-2" /> Processing...
               </>
             ) : (
               "Save"
@@ -288,24 +303,24 @@ const UploadFiles = () => {
 
       {/* Embedded Script */}
       <Card>
-        <CardHeader className="text-lg font-semibold">
+        <CardHeader className="text-base sm:text-lg font-semibold px-4 sm:px-6">
           Embedded Script
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           <div className="relative">
             <Textarea
-              className="font-mono text-sm pr-10 h-24 bg-[#1e2b3b] text-white"
+              className="font-mono text-xs sm:text-sm pr-10 h-20 sm:h-24 bg-[#1e2b3b] text-white"
               readOnly
               value={`<script defer src="${scriptUrl}"></script>`}
             />
             <button
-              className="absolute top-2 right-2 p-2 bg-gray-200 rounded-md hover:bg-gray-300"
+              className="absolute top-2 right-2 p-1 sm:p-2 bg-gray-200 rounded-md hover:bg-gray-300"
               onClick={copyToClipboard}
             >
               {copied ? (
-                <Check className="w-4 h-4 text-[#1e2b3b]" />
+                <Check className="w-3 h-3 sm:w-4 sm:h-4 text-[#1e2b3b]" />
               ) : (
-                <Clipboard className="w-4 h-4" />
+                <Clipboard className="w-3 h-3 sm:w-4 sm:h-4" />
               )}
             </button>
           </div>
@@ -314,7 +329,7 @@ const UploadFiles = () => {
 
       {/* Copy Popup */}
       {showPopup && (
-        <div className="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-md shadow-md">
+        <div className="fixed bottom-4 right-4 bg-gray-800 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-md shadow-md text-xs sm:text-sm">
           Copied to clipboard
         </div>
       )}
@@ -329,47 +344,54 @@ const SQLConnection = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   return (
-    <Card>
-      <CardHeader className="text-lg font-semibold">
-        SQL Database Connection
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <Label htmlFor="host">Host</Label>
-          <Input
-            id="host"
-            value={hostName}
-            onChange={(e) => setHostName(e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="dbName">Database Name</Label>
-          <Input
-            id="dbName"
-            value={dbName}
-            onChange={(e) => setDbName(e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="username">Username</Label>
-          <Input
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+    <div className="w-full max-w-none">
+      <Card>
+        <CardHeader className="text-base sm:text-lg font-semibold px-4 sm:px-6">
+          SQL Database Connection
+        </CardHeader>
+        <CardContent className="space-y-4 px-4 sm:px-6">
+          <div>
+            <Label htmlFor="host" className="text-sm sm:text-base">Host</Label>
+            <Input
+              id="host"
+              value={hostName}
+              onChange={(e) => setHostName(e.target.value)}
+              className="text-sm sm:text-base"
+            />
+          </div>
+          <div>
+            <Label htmlFor="dbName" className="text-sm sm:text-base">Database Name</Label>
+            <Input
+              id="dbName"
+              value={dbName}
+              onChange={(e) => setDbName(e.target.value)}
+              className="text-sm sm:text-base"
+            />
+          </div>
+          <div>
+            <Label htmlFor="username" className="text-sm sm:text-base">Username</Label>
+            <Input
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="text-sm sm:text-base"
+            />
+          </div>
+          <div>
+            <Label htmlFor="password" className="text-sm sm:text-base">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="text-sm sm:text-base"
+            />
+          </div>
 
-        <Button className="w-full bg-[#1e2b3b] text-white">Save</Button>
-      </CardContent>
-    </Card>
+          <Button className="w-full bg-[#1e2b3b] text-white text-sm sm:text-base">Save</Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
@@ -506,38 +528,38 @@ const ModelsManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-none space-y-4 sm:space-y-6">
       <Card className="border-0 shadow-sm">
-        <CardHeader className="pb-4">
-          <div className="flex items-start justify-between">
+        <CardHeader className="pb-4 px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">AI Models Management</h2>
-              <p className="text-gray-600 mt-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">AI Models Management</h2>
+              <p className="text-gray-600 mt-1 text-sm sm:text-base">
                 Manage your AI model providers and API keys for the chatbot
               </p>
             </div>
             <Button
               onClick={() => setShowAddForm(true)}
-              className="bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 px-4 py-2"
+              className="bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base w-full sm:w-auto"
             >
-              <Plus size={16} />
+              <Plus size={14} className="sm:w-4 sm:h-4" />
               Add Model
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 px-4 sm:px-6">
           {models.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                <Bot size={32} className="text-gray-400" />
+            <div className="text-center py-8 sm:py-12">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <Bot size={24} className="sm:w-8 sm:h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No AI models configured</h3>
-              <p className="text-gray-500 mb-4">Add your first model to get started with the chatbot</p>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No AI models configured</h3>
+              <p className="text-gray-500 mb-4 text-sm sm:text-base">Add your first model to get started with the chatbot</p>
               <Button
                 onClick={() => setShowAddForm(true)}
-                className="bg-gray-900 hover:bg-gray-800 text-white"
+                className="bg-gray-900 hover:bg-gray-800 text-white text-sm sm:text-base"
               >
-                <Plus size={16} className="mr-2" />
+                <Plus size={14} className="sm:w-4 sm:h-4 mr-2" />
                 Add Your First Model
               </Button>
             </div>
@@ -545,38 +567,38 @@ const ModelsManagement = () => {
             <div className="space-y-3">
               {models.map((model) => (
                 <Card key={model.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                  <CardContent className="p-3 sm:p-5">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                      <div className="flex-1 w-full">
                         {/* Header with name, provider, and primary badge */}
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                            <Bot size={18} className="text-white" />
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                            <Bot size={16} className="sm:w-[18px] sm:h-[18px] text-white" />
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-gray-900">{model.name}</h3>
+                              <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{model.name}</h3>
                             </div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-xs sm:text-sm text-gray-500">
                               {providerOptions[model.provider]?.name || model.provider}
                             </p>
                           </div>
                         </div>
 
                         {/* API Key section */}
-                        <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="mb-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center gap-2">
                             <Label className="text-xs font-medium text-gray-600 uppercase tracking-wide">API Key</Label>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => toggleApiKeyVisibility(model.id)}
-                              className="p-0 h-5 w-5 text-gray-400 hover:text-gray-600"
+                              className="p-0 h-4 w-4 sm:h-5 sm:w-5 text-gray-400 hover:text-gray-600"
                             >
-                              {showApiKeys[model.id] ? <EyeOff size={12} /> : <Eye size={12} />}
+                              {showApiKeys[model.id] ? <EyeOff size={10} className="sm:w-3 sm:h-3" /> : <Eye size={10} className="sm:w-3 sm:h-3" />}
                             </Button>
                           </div>
-                          <code className="text-sm text-gray-800 font-mono">
+                          <code className="text-xs sm:text-sm text-gray-800 font-mono break-all">
                             {showApiKeys[model.id] ? model.apiKey : maskApiKey(model.apiKey)}
                           </code>
                         </div>
@@ -586,11 +608,11 @@ const ModelsManagement = () => {
                           <Label className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2 block">
                             Available Models ({model.models.length})
                           </Label>
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-1 sm:gap-1.5">
                             {model.models.map((modelName, index) => (
                               <span
                                 key={`${model.id}-${modelName}-${index}`}
-                                className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md border border-blue-200 font-medium"
+                                className="text-xs bg-blue-50 text-blue-700 px-2 py-1 sm:px-2.5 sm:py-1 rounded-md border border-blue-200 font-medium break-all"
                               >
                                 {modelName}
                               </span>
@@ -600,14 +622,15 @@ const ModelsManagement = () => {
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex flex-col gap-2 ml-4">
+                      <div className="flex sm:flex-col gap-2 sm:ml-4 w-full sm:w-auto">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleDeleteModel(model.id)}
-                          className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
+                          className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400 flex-1 sm:flex-none text-xs sm:text-sm"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={12} className="sm:w-[14px] sm:h-[14px]" />
+                          <span className="sm:hidden ml-1">Delete</span>
                         </Button>
                       </div>
                     </div>
@@ -622,17 +645,17 @@ const ModelsManagement = () => {
       {/* Add Model Form */}
       {showAddForm && (
         <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold">Add New AI Model</h3>
+          <CardHeader className="px-4 sm:px-6">
+            <h3 className="text-base sm:text-lg font-semibold">Add New AI Model</h3>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-4 sm:px-6">
             <div>
-              <Label htmlFor="provider">Provider</Label>
+              <Label htmlFor="provider" className="text-sm sm:text-base">Provider</Label>
               <select
                 id="provider"
                 value={newModel.provider}
                 onChange={(e) => setNewModel(prev => ({ ...prev, provider: e.target.value }))}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
               >
                 <option value="">Select a provider</option>
                 {Object.entries(providerOptions).map(([key, option]) => (
@@ -644,34 +667,36 @@ const ModelsManagement = () => {
             </div>
 
             <div>
-              <Label htmlFor="modelName">Configuration Name</Label>
+              <Label htmlFor="modelName" className="text-sm sm:text-base">Configuration Name</Label>
               <Input
                 id="modelName"
                 value={newModel.name}
                 onChange={(e) => setNewModel(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="e.g., My OpenAI Account"
+                className="text-sm sm:text-base"
               />
             </div>
 
             <div>
-              <Label htmlFor="apiKey">API Key</Label>
+              <Label htmlFor="apiKey" className="text-sm sm:text-base">API Key</Label>
               <Input
                 id="apiKey"
                 type="password"
                 value={newModel.apiKey}
                 onChange={(e) => setNewModel(prev => ({ ...prev, apiKey: e.target.value }))}
                 placeholder={newModel.provider ? providerOptions[newModel.provider].placeholder : 'Enter your API key'}
+                className="text-sm sm:text-base"
               />
             </div>
 
             {newModel.provider && (
               <div>
-                <Label>Available Models</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <Label className="text-sm sm:text-base">Available Models</Label>
+                <div className="flex flex-wrap gap-1 sm:gap-2 mt-2">
                   {providerOptions[newModel.provider].models.map((modelName, index) => (
                     <span
                       key={`${newModel.provider}-${modelName}-${index}`}
-                      className="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full"
+                      className="text-xs sm:text-sm bg-gray-100 text-gray-700 px-2 py-1 sm:px-3 sm:py-1 rounded-full break-all"
                     >
                       {modelName}
                     </span>
@@ -680,10 +705,10 @@ const ModelsManagement = () => {
               </div>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 onClick={handleAddModel}
-                className="bg-[#1e2b3b] text-white"
+                className="bg-[#1e2b3b] text-white text-sm sm:text-base"
               >
                 Add Model
               </Button>
@@ -693,6 +718,7 @@ const ModelsManagement = () => {
                   setShowAddForm(false);
                   setNewModel({ provider: '', apiKey: '', name: '' });
                 }}
+                className="text-sm sm:text-base"
               >
                 Cancel
               </Button>

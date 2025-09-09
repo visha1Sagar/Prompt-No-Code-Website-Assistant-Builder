@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu, Github } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import Image from "next/image";
 
 export default function Navbar() {
@@ -50,6 +50,7 @@ export default function Navbar() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left">
+          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           <nav className="flex flex-col gap-4 mt-6">
             <Link
               href="/train"
