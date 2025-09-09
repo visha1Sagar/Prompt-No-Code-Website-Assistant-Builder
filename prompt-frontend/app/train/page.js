@@ -109,18 +109,6 @@ const UploadFiles = () => {
   };
 
   const handleFileUpload = (event) => {
-    // Check if any AI models are configured
-    const savedModels = localStorage.getItem('aiModels');
-    const models = savedModels ? JSON.parse(savedModels) : [];
-    
-    if (models.length === 0) {
-      setErrors((prev) => ({
-        ...prev,
-        files: "Please add at least one AI model first. Go to the 'AI Models Management' tab to configure your API keys.",
-      }));
-      return;
-    }
-
     const selectedFiles = Array.from(event.target.files || []);
     const filteredFiles = selectedFiles.filter((file) =>
       ["application/pdf", "text/plain"].includes(file.type)
@@ -146,16 +134,6 @@ const UploadFiles = () => {
   const handleSave = async () => {
     let newErrors = { website: "" };
 
-    // Check if any AI models are configured
-    const savedModels = localStorage.getItem('aiModels');
-    const models = savedModels ? JSON.parse(savedModels) : [];
-    
-    if (models.length === 0) {
-      newErrors.website = "Please add at least one AI model first. Go to the 'AI Models Management' tab to configure your API keys.";
-      setErrors(newErrors);
-      return;
-    }
-
     if (!website.trim()) {
       newErrors.website = "Website URL is required.";
     }
@@ -168,13 +146,19 @@ const UploadFiles = () => {
     formData.append("website_url", website);
     files.forEach((file) => formData.append("files", file));
 
+    // Add user ID for potential future use
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      formData.append("user_id", userId);
+    }
+
     setLoading(true); // Start loading
 
     try {
       const response = await fetch(
         `${config.backendUrl}/create_bot/`,
         {
-          method: "GET",
+          method: "POST",
           body: formData,
         }
       );
@@ -405,17 +389,11 @@ const ModelsManagement = () => {
     name: ''
   });
   const [showApiKeys, setShowApiKeys] = useState({});
-  const [primaryModel, setPrimaryModel] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('primaryModel') || '';
-    }
-    return '';
-  });
 
   const providerOptions = {
     openai: {
       name: 'OpenAI',
-      models: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+      models: ['gpt-4.1-nano', 'gpt-5-nano', 'gpt-4o-mini'],
       placeholder: 'sk-...'
     },
     gemini: {
@@ -425,7 +403,7 @@ const ModelsManagement = () => {
     }
   };
 
-  const handleAddModel = () => {
+  const handleAddModel = async () => {
     if (!newModel.provider || !newModel.apiKey || !newModel.name) {
       alert('Please fill in all fields');
       return;
@@ -440,25 +418,76 @@ const ModelsManagement = () => {
       createdAt: new Date().toISOString()
     };
 
-    const updatedModels = [...models, modelData];
-    setModels(updatedModels);
-    localStorage.setItem('aiModels', JSON.stringify(updatedModels));
-    
-    setNewModel({ provider: '', apiKey: '', name: '' });
-    setShowAddForm(false);
-  };
+    // Generate or get user ID
+    let userId = localStorage.getItem('userId');
+    if (!userId) {
+      userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('userId', userId);
+    }
 
-  const handleDeleteModel = (id) => {
-    if (window.confirm('Are you sure you want to delete this model configuration?')) {
-      const updatedModels = models.filter(model => model.id !== id);
+    // Store API key in backend
+    try {
+      const response = await fetch(`${config.backendUrl}/store_api_key/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          provider: newModel.provider,
+          api_key: newModel.apiKey,
+          model_name: newModel.name
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to store API key in backend');
+      }
+
+      const updatedModels = [...models, modelData];
       setModels(updatedModels);
       localStorage.setItem('aiModels', JSON.stringify(updatedModels));
       
-      // Clear primary model if the deleted model was primary
-      if (primaryModel === id) {
-        setPrimaryModel('');
-        localStorage.setItem('primaryModel', '');
+      setNewModel({ provider: '', apiKey: '', name: '' });
+      setShowAddForm(false);
+      
+      alert('AI model added successfully!');
+    } catch (error) {
+      console.error('Error storing API key:', error);
+      alert('Failed to store API key securely. Please try again.');
+    }
+  };
+
+  const handleDeleteModel = async (id) => {
+    if (window.confirm('Are you sure you want to delete this model configuration?')) {
+      const modelToDelete = models.find(model => model.id === id);
+      const userId = localStorage.getItem('userId');
+      
+      // Delete from backend if we have user ID and model
+      if (userId && modelToDelete) {
+        try {
+          const response = await fetch(`${config.backendUrl}/delete_api_key/`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: userId,
+              provider: modelToDelete.provider
+            }),
+          });
+
+          if (!response.ok) {
+            console.warn('Failed to delete API key from backend, but continuing with local deletion');
+          }
+        } catch (error) {
+          console.error('Error deleting API key from backend:', error);
+        }
       }
+      
+      const updatedModels = models.filter(model => model.id !== id);
+      setModels(updatedModels);
+      localStorage.setItem('aiModels', JSON.stringify(updatedModels));
     }
   };
 
@@ -467,12 +496,6 @@ const ModelsManagement = () => {
       ...prev,
       [id]: !prev[id]
     }));
-  };
-
-  const handleSetPrimary = (id) => {
-    const newPrimary = primaryModel === id ? '' : id;
-    setPrimaryModel(newPrimary);
-    localStorage.setItem('primaryModel', newPrimary);
   };
 
   const maskApiKey = (apiKey) => {
@@ -492,12 +515,6 @@ const ModelsManagement = () => {
               <p className="text-gray-600 mt-1">
                 Manage your AI model providers and API keys for the chatbot
               </p>
-              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-blue-700 text-sm flex items-center gap-2">
-                  <span className="text-blue-500">📌</span>
-                  <strong>Note:</strong> The primary model will be used for generating embeddings and as the default model
-                </p>
-              </div>
             </div>
             <Button
               onClick={() => setShowAddForm(true)}
@@ -539,11 +556,6 @@ const ModelsManagement = () => {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="font-semibold text-gray-900">{model.name}</h3>
-                              {primaryModel === model.id && (
-                                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium border border-emerald-200">
-                                  PRIMARY
-                                </span>
-                              )}
                             </div>
                             <p className="text-sm text-gray-500">
                               {providerOptions[model.provider]?.name || model.provider}
@@ -589,17 +601,6 @@ const ModelsManagement = () => {
 
                       {/* Action buttons */}
                       <div className="flex flex-col gap-2 ml-4">
-                        <Button
-                          variant={primaryModel === model.id ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => handleSetPrimary(model.id)}
-                          className={primaryModel === model.id 
-                            ? "text-white bg-emerald-600 hover:bg-emerald-700 border-emerald-600" 
-                            : "text-emerald-600 border-emerald-300 hover:bg-emerald-50 hover:border-emerald-400"
-                          }
-                        >
-                          {primaryModel === model.id ? "Primary" : "Set Primary"}
-                        </Button>
                         <Button
                           variant="outline"
                           size="sm"

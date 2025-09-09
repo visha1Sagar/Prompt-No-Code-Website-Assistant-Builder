@@ -15,7 +15,7 @@ def ask_openai(prompt, token_count, top_p=0.1, temperature=0.3, presence_penalty
     }
 
     payload = {
-        "model": "gpt-4o",
+        "model": "gpt-4o-mini",
         "messages": [
             {"role": "system", "content": developer_prompt},
             {"role": "user", "content": prompt}

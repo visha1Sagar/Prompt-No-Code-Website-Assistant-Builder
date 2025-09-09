@@ -1,11 +1,115 @@
+# Environment variables and secrets
 .env
-/myenv
-/__pycache__
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# API Keys and user data
+user_api_keys.json
+
+# Python
+__pycache__/
 */__pycache__/
-/faiss_index
-scrapped_text.txt
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+/myenv
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Database and storage
 vector_db_storage/
+/faiss_index
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary and cache files
+scrapped_text.txt
 crawl_json_temp.json
+vector_db_storage/
 tree_output.json
 crawl_results.json
 crawl_results_cleaned.json
+*.tmp
+*.temp
+.cache/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs
+*.log
+logs/
+log/
+
+# Node.js (for frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Backup files
+*.bak
+*.backup
+
+# Model files (can be large)
+*.bin
+*.safetensors
+models/
+
+# Chrome/Browser artifacts (from web scraping)
+*.crdownload

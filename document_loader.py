@@ -2,7 +2,6 @@ import os
 import tempfile
 from typing import List, Optional
 import dotenv
-from fastapi import UploadFile
 from langchain_core.documents import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 
@@ -18,6 +17,29 @@ logging.basicConfig(level=logging.INFO)
 
 def get_embeddings_function():
     """Initialize embeddings function using Sentence Transformers only."""
+    try:
+        from langchain_community.embeddings import HuggingFaceEmbeddings
+        return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    except ImportError:
+        logger.error("HuggingFace embeddings not available. Please install sentence-transformers")
+        raise RuntimeError("No embedding function available. Please install sentence-transformers")
+
+def get_embeddings_for_vector_db():
+    """Get embeddings function for vector database - always uses environment OpenAI API key if available."""
+    # Try environment OpenAI API key first
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    if openai_api_key and openai_api_key.strip() and not openai_api_key.startswith('your_'):
+        try:
+            from langchain_openai import OpenAIEmbeddings
+            logger.info("Using OpenAI embeddings from environment for vector database")
+            return OpenAIEmbeddings(api_key=openai_api_key)
+        except ImportError:
+            logger.warning("OpenAI embeddings not available, falling back to local")
+        except Exception as e:
+            logger.warning(f"Error initializing OpenAI embeddings: {e}, falling back to local")
+    
+    # Fallback to local embeddings
+    logger.info("Using local HuggingFace embeddings for vector database")
     try:
         from langchain_community.embeddings import HuggingFaceEmbeddings
         return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -150,20 +172,53 @@ def deduplicate_chunks(chunks: List[Document], similarity_threshold: float = 0.9
     return unique_chunks
 
 def load_vector_database(persist_directory) -> Optional[Chroma]:
-    """Load an existing vector database from disk."""
+    """Load an existing vector database from disk.
+    
+    Tries environment OpenAI API key first, then falls back to local embeddings.
+    This handles databases created with different embedding types.
+    """
+    
+    # Strategy 1: Try environment OpenAI API key first
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    if openai_api_key and openai_api_key.strip() and not openai_api_key.startswith('your_'):
+        try:
+            from langchain_openai import OpenAIEmbeddings
+            embeddings = OpenAIEmbeddings(api_key=openai_api_key)
+            vector_db = Chroma(
+                persist_directory=persist_directory,
+                embedding_function=embeddings
+            )
+            # Test with a simple query to see if it works
+            vector_db.similarity_search("test", k=1)
+            logger.info(f"Vector database loaded with OpenAI embeddings from: {persist_directory}")
+            return vector_db
+        except ImportError:
+            logger.warning("OpenAI embeddings not available, trying local embeddings")
+        except Exception as e:
+            logger.warning(f"Failed to load with OpenAI embeddings: {e}, trying local embeddings")
+    
+    # Strategy 2: Fallback to local embeddings
     try:
+        from langchain_community.embeddings import HuggingFaceEmbeddings
+        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         vector_db = Chroma(
             persist_directory=persist_directory,
-            embedding_function=get_embeddings_function()
+            embedding_function=embeddings
         )
-        logger.info(f"Vector database loaded from: {persist_directory}")
+        # Test with a simple query
+        vector_db.similarity_search("test", k=1)
+        logger.info(f"Vector database loaded with local embeddings from: {persist_directory}")
         return vector_db
     except Exception as e:
-        logger.error(f"Error loading vector database: {e}")
+        logger.error(f"Error loading vector database with any embeddings: {e}")
         return None
 
-def process_documents_and_create_db(files, persist_directory=None, chunk_strategy: str = "semantic") -> Optional[Chroma]:
-    """Process documents and create a vector database."""
+def process_documents_and_create_db(files, persist_directory=None, model_provider=None, api_key=None, chunk_strategy: str = "semantic") -> Optional[Chroma]:
+    """Process documents and create a vector database.
+    
+    Note: model_provider and api_key are accepted for compatibility but ignored.
+    Always uses environment OpenAI API key for embeddings, or falls back to local embeddings.
+    """
     
     all_documents = []
     
@@ -172,19 +227,7 @@ def process_documents_and_create_db(files, persist_directory=None, chunk_strateg
         
         # Handle different file types
         try:
-            if isinstance(file, UploadFile):
-                # Handle FastAPI UploadFile
-                file_extension = os.path.splitext(file.filename)[1].lower()
-                
-                with tempfile.NamedTemporaryFile(mode='wb+', suffix=file_extension, delete=False) as temp_file:
-                    # For UploadFile, read from the underlying file directly
-                    file.file.seek(0)  # Reset position
-                    content = file.file.read()
-                    temp_file.write(content)
-                    temp_file.flush()
-                    file_path_to_load = temp_file.name
-                    
-            elif isinstance(file, tempfile._TemporaryFileWrapper):
+            if isinstance(file, tempfile._TemporaryFileWrapper):
                 # Handle temporary file wrapper
                 file_path_to_load = file.name
                 
@@ -193,12 +236,8 @@ def process_documents_and_create_db(files, persist_directory=None, chunk_strateg
                 file_path_to_load = file
                 
             else:
-                # Handle file-like object
-                file_path_to_load = tempfile.NamedTemporaryFile(mode='wb+', suffix=".txt", delete=False)
-                content = file.read()
-                file_path_to_load.write(content.encode() if isinstance(content, str) else content)
-                file_path_to_load.flush()
-                file_path_to_load = file_path_to_load.name
+                logger.error(f"Unsupported file type: {type(file)}")
+                continue
                 
             documents = load_document(file_path_to_load)
             all_documents.extend(documents)
@@ -229,7 +268,7 @@ def process_documents_and_create_db(files, persist_directory=None, chunk_strateg
     try:
         vector_db = Chroma.from_documents(
             documents=chunks,
-            embedding=get_embeddings_function(),
+            embedding=get_embeddings_for_vector_db(),
             persist_directory=persist_directory
         )
         logger.info(f"Vector database created with {len(chunks)} chunks")
