@@ -3,15 +3,15 @@
 .env.local
 .env.development
 .env.test
-.env.production
+# .env.production
 .env.staging
 
 # API Keys and user data
 user_api_keys.json
 
 # Python
-__pycache__/
-*/__pycache__/
+# __pycache__/
+# */__pycache__/
 *.py[cod]
 *$py.class
 *.so
