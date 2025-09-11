@@ -1,174 +1,225 @@
-# 🚀 Prompt:  Unleash the Power of AI Chatbots on *Any* Website - No Code Required! 🤖
+# 🤖 Prompt No-Code Website Assistant Builder
 
-**Tired of complex chatbot integrations?**  ✨ **Prompt** ✨ revolutionizes website interaction by offering a **lightning-fast, no-code solution** to create intelligent, website-aware chatbots.  Imagine deploying a cutting-edge AI assistant on *any* website in minutes, simply by providing a URL!  This project delivers a powerful REST API built with FastAPI, seamlessly integrated with a user-friendly frontend, to empower anyone to harness the magic of Large Language Models (LLMs) and vector databases.
+A powerful no-code platform for creating intelligent AI chatbots that can be embedded on any website. Simply upload your documents, train your AI assistant, and deploy it anywhere with a single embed script.
 
-**Stop coding, start conversing! Welcome to the future of website engagement.**
+---
 
-## 🔥 Key Features - Prepare to be Amazed! 🔥
+## ✨ Features
 
-*   **Instant Bot Creation - Website to Chatbot in a Click!**:
-    *   **Website Crawling Wizardry**:  Simply provide a website URL, and our intelligent system *automagically* crawls, extracts, and transforms website content into a fully functional chatbot brain! 🧠
-    *   **Document Power-Up**:  Supercharge your bot with local knowledge! Upload PDFs and TXT files to infuse specific documents and expertise into your chatbot's capabilities. 📚
-    *   **Hybrid Training Mastery**: Unleash the ultimate knowledge fusion! Combine website crawling and document uploads for truly comprehensive and deeply informed chatbots. 🚀
+### 🚀 **No-Code AI Training**
+- **Drag & drop document uploads** (PDF, TXT, DOCX, and more)
+- **Website crawling** with advanced content extraction using Crawl4AI
+- **Automatic knowledge base creation** using ChromaDB vector storage
 
-*   **Mind-Reading Intelligent Querying - Answers that Wow!**:
-    *   **Natural Language Ninja**:  Users ask questions in plain English, and **Prompt** understands!  No more rigid command structures – just natural, intuitive conversation. 🗣️
-    *   **Context-Aware Genius**:  Powered by advanced LLMs and vector databases, our chatbots deliver laser-focused, contextually relevant answers, drawing directly from the learned website and document data. 💡
 
-*   **Under the Hood Magic - Cutting-Edge Tech, Zero Complexity**:
-    *   **Vector Database Velocity**:  ChromaDB ensures blazing-fast information retrieval, powering instant and accurate query responses. ⚡
-    *   **Web Crawling Prowess**:  `crawl4ai` tackles even the most intricate website structures, extracting valuable text content with unmatched robustness. 🕸️
-    *   **OpenAI Brainpower**:  Fueled by OpenAI's state-of-the-art models (like `gpt-4o`!), **Prompt** generates insightful, human-like answers that will leave users impressed. ✨
+### 🔐 **Secure API Management**
+- **User API key storage system** with file-based persistence
+- **Multiple AI provider support** (OpenAI, Google, Hugging Face)
+- **Secure credential handling** with proper encryption
+- **User session management** with persistent storage
 
-*   **Frontend Playground - Design Your Dream Chatbot in Real-Time!**:
-    *   **Visual Customization Paradise**:  Shape the perfect chatbot widget with our intuitive, real-time customization panel! Tweak everything from colors and messages to branding and appearance – all with live preview! 🎨
-        *   **Brand it Boldly**: Chatbot Name, Display Name, Profile Image – make it yours!
-        *   **Craft Compelling Conversations**: Welcome messages, placeholder text, header text, assistant prompts – design the perfect conversational flow.
-        *   **Unleash Your Inner Designer**: AI & User message backgrounds, accent colors, icon styles –  make your chatbot visually stunning!
-    *   **Chat Preview Sandbox**:  Test drive your chatbot creations instantly! Interact with a live preview directly within the playground environment. 🕹️
-    *   **Embeddable Magic Script**:  Generate a single line of JavaScript code to effortlessly embed your customized chatbot onto *any* website. 🪄  **Deployment is now literally copy-paste simple!**
+### 🐳 **Production Ready**
+- **Docker containerization** with health checks and resource limits
+- **Development and production modes** with hot reload support
+- **CORS configuration** for frontend-backend integration
+- **Comprehensive error handling** and validation
 
-*   **Developer-Friendly API - Power and Flexibility for the Tech-Savvy**:
-    *   **REST API Mastery**:  Clean, well-documented API endpoints (`/create_bot/`, `/query_bot/`) for seamless integration and programmatic chatbot management. 💻
-    *   **CORS Enabled**:  Effortless cross-origin communication – use your chatbot anywhere on the web without restriction. 🌐
+---
 
-*   **Performance & Efficiency Built-In**:
-    *   **Caching Champions**: `lru_cache` optimizes vector database access, ensuring lightning-fast response times even for heavily used chatbots. 🚀
-    *   **Robust Logging**: Comprehensive logging provides deep insights for debugging and monitoring, ensuring smooth operation. 📊
+## 🏗️ Architecture
 
-## ✨ Innovation Highlights - Why Prompt is a Game-Changer! ✨
+### **Backend (FastAPI + Python 3.11)**
+- **FastAPI** web framework with automatic API documentation
+- **ChromaDB** vector database for knowledge storage
+- **LangChain** for document processing and AI integration
+- **Crawl4AI** for intelligent website content extraction
+- **User API storage system** for secure credential management
 
-*   **No-Code Chatbot Creation**: Democratizes AI! Anyone, regardless of coding expertise, can build and deploy intelligent website assistants.
-*   **Rapid Deployment**:  Go from zero to chatbot in *minutes*.  Train, customize, and embed with unparalleled speed.
-*   **Visually Stunning Customization**:  Create chatbots that perfectly match your brand and website aesthetic with real-time visual feedback.
-*   **Universal Website Compatibility**:  Embed your chatbot on *any* website with a single line of code.
-*   **Combines Web Crawling & Document Learning**:  Offers unparalleled flexibility in training data sources for truly comprehensive chatbot knowledge.
+### **Frontend (Next.js 15 + React 19)**
+- **Modern React** with App Router and server components
+- **Responsive design** with Tailwind CSS and mobile-first approach
+- **Radix UI components** for accessibility and consistent design
+- **Real-time preview** and configuration interface
 
-## 🛠️ Installation - Get Started in Minutes! 🛠️
+### **Infrastructure**
+- **Docker containers** with multi-stage builds and security hardening
+- **Health monitoring** with automatic restart policies
+- **Volume persistence** for data storage and API keys
+- **Resource management** with CPU and memory limits
+
+---
+
+## 🛠️ Installation
 
 ### Prerequisites
+- **Docker & Docker Compose** (recommended)
+- **Python 3.11+** (for local development)
+- **Node.js 18+** (for frontend development)
+- **OpenAI API Key** or other supported AI provider
 
-*   **Python 3.8+**
-*   **pip** (Python package installer)
-*   **Node.js and npm** (for Frontend - if you want to experience the visual playground!)
-*   **OpenAI API Key**:  Unlock the power of LLMs! [Get your API key here](https://platform.openai.com/api-keys).
-*   **Ngrok Account** (Optional): Share your chatbot API with the world instantly! [Sign up for Ngrok](https://ngrok.com/).
+### Quick Start with Docker (Recommended)
 
-### Backend Setup Steps
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/prompt-no-code-website-assistant-builder.git
+   cd prompt-no-code-website-assistant-builder
+   ```
 
-1.  **Clone the repository:**
+2. **Set up environment:**
+   ```bash
+   cp .env.example .env
+   # Add your OpenAI API key to .env
+   ```
 
-    ```bash
-    git clone https://github.com/visha1Sagar/The-Chateaus_Prompt.git
-    cd The-Chateaus_Prompt
-    ```
+3. **Start the backend:**
+   ```bash
+   # For development with hot reload
+   .\start-local.ps1
+   
+   # Or manually with Docker Compose
+   docker-compose up --build -d backend
+   ```
 
-2.  **Set up your virtual environment:**
+4. **Access the application:**
+   - **Backend API:** http://localhost:8000
+   - **API Documentation:** http://localhost:8000/docs
+   - **Health Check:** http://localhost:8000/health
 
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # Linux/macOS
-    venv\Scripts\activate  # Windows
-    ```
+### Frontend Development Setup
 
-3.  **Install backend dependencies:**
+1. **Navigate to frontend directory:**
+   ```bash
+   cd prompt-frontend
+   ```
 
-    ```bash
-    pip install -r requirements.txt
-    playwright --install
-    ```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-4.  **Configure your OpenAI API Key:**
+3. **Configure backend URL:**
+   ```bash
+   # Create .env.local
+   echo "NEXT_PUBLIC_BACKEND_URL=http://localhost:8000" > .env.local
+   ```
 
-    *   Create a `.env` file in the project root.
-    *   Add your API key:
-        ```env
-        OPENAI_API_KEY=your_openai_api_key_here
-        ```
+4. **Start development server:**
+   ```bash
+   npm run dev
+   ```
 
-### Frontend Setup Steps - Unleash the Playground!
+5. **Access frontend:** http://localhost:3000
 
-1.  **Navigate to the frontend:**
+---
 
-    ```bash
-    cd prompt-frontend
-    ```
+## 🎯 Usage Guide
 
-2.  **Install frontend dependencies:**
+### 1. **Train Your AI Assistant**
+- Navigate to the **Train** tab
+- Upload documents or provide website URLs for crawling
+- Configure your AI model and API keys
+- Save your configuration to create the knowledge base
 
-    ```bash
-    npm install # or yarn install
-    ```
+### 2. **Customize Your Chatbot**
+- Use the **Playground** tab for real-time customization
+- Set chatbot name, display name, and welcome messages
+- Upload custom profile images and configure styling
+- Preview changes in the integrated chat interface
 
-3.  **Set the backend API URL:**
+### 3. **Deploy Your Assistant**
+- Go to the **Train** tab to get your embed script
+- Copy the generated script code
+- Paste it in your website
+- Your AI assistant is now live and ready to help users
 
-    *   Create `.env.local` in `prompt-frontend`.
-    *   Point to your backend:
-        ```env
-        NEXT_PUBLIC_BACKEND_URL=http://localhost:8000  # Local backend OR your Ngrok URL!
-        ```
+---
+## 🔧 Development
 
-4.  **Launch the frontend!**
+### **Backend Development**
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-    ```bash
-    npm run dev # or yarn dev
-    ```
+# Run with hot reload
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
+```
 
-5.  **Access the Playground at `http://localhost:3000`!**
+### **Frontend Development**
+```bash
+# Install dependencies
+npm install
 
-## 🚀 Usage - From Zero to Chatbot Hero! 🚀
+# Development server with hot reload
+npm run dev
 
-### Running the API and Frontend - Double the Power!
+# Build for production
+npm run build
 
-1.  **Backend Blast-Off:** Start your API (see "Running the API" in the full README).
-2.  **Frontend Ignition:** Launch the frontend dev server (see "Frontend Setup Steps").
-3.  **Playground Access:** Open your browser to `http://localhost:3000` and enter the **Prompt Playground!**
-4.  **Train Like a Pro**:
-    *   "Train" page -> "Website Link and File Upload".
-    *   Enter website URL, upload files.
-    *   "Save" -  and BOOM! Chatbot brain is online! Get your embed script & bot ID.
-5.  **Customize & Conquer**:
-    *   "Playground" page - unleash your creativity!
-    *   Tweak settings, preview live, perfect your chatbot's look and feel.
-6.  **Embed & Engage**:
-    *   "Train" page -> Copy "Embedded Script".
-    *   Paste into your website's `<body>`.  **Done!** Your AI assistant is live!
+# Start production server
+npm start
+```
 
-## 🛠️ Tech Stack ⚙️
+### **Docker Development**
+```bash
+# Development mode with hot reload
+docker-compose -f docker-compose.dev.yml up --build
 
-**Prompt** leverages a modern and robust technology stack for both backend API and frontend interface:
+# Production mode
+docker-compose up --build
 
-### Backend
+# View logs
+docker-compose logs -f backend
 
-*   **Framework**: **FastAPI** - A high-performance Python framework for building APIs, known for its speed and ease of use.
-*   **Language**: **Python 3.8+** -  A versatile and widely-used language ideal for AI and backend development.
-*   **LLM Integration**: **OpenAI API** - Utilizing powerful models like `gpt-4o` to generate intelligent and contextually relevant chatbot responses.
-*   **Vector Database**: **ChromaDB** - An embedded vector database for efficient storage and similarity search of document embeddings.
-*   **Web Crawling**: **crawl4ai** - A dedicated web crawling library designed for robust and effective website data extraction.
-*   **Document Processing**: **PyMuPDF (fitz)** -  For efficient loading and text extraction from PDF documents.
-*   **Caching**: **lru-cache** -  For in-memory caching to enhance performance and reduce latency.
-*   **API Tools**:
-    *   **Uvicorn** - ASGI server to run the FastAPI application.
-    *   **Pydantic** - For data validation and settings management.
-    *   **Requests** - For making HTTP requests.
-    *   **Starlette** -  Underlying framework for FastAPI, providing core ASGI functionality.
-    *   **Python-dotenv** -  For managing environment variables securely.
-    *   **UUID** - For generating unique identifiers.
-    *   **Pyngrok** -  (Optional) For quickly exposing the API via Ngrok tunnels.
-    *   **Logging** - Python's built-in logging library for application monitoring and debugging.
+# Clean up
+docker-compose down -v --remove-orphans
+```
 
-### Frontend
+---
 
-*   **Framework**: **Next.js** - A React framework for building user interfaces, known for performance and developer experience.
-*   **Language**: **JavaScript (ES6+)** / **JSX** - Modern JavaScript and JSX syntax for building dynamic UI components.
-*   **UI Components**:  **Custom React Components & UI Library** -  Utilizing reusable UI components (likely from a library like Radix UI, Shadcn UI - needs verification) for a polished and consistent design. Includes components like: `Card`, `Button`, `Input`, `Textarea`, `Label`, `Separator`.
-*   **Icons**: **lucide-react** -  For a consistent and beautiful icon set.
-*   **Styling**: **CSS Modules / Global CSS** -  For styling components and the overall application.
-*   **Environment Variables**: **dotenv (via Next.js)** -  For managing frontend environment configuration.
+## 🚀 Deployment
 
-## 🤝 Contributing - Join the Prompt Revolution! 🤝
+### **Backend Deployment**
+- **Docker**: Use provided Docker configuration for containerized deployment
+- **Cloud**: Deploy on AWS, GCP, Azure with container services
+- **Server**: Direct deployment with Python and systemd service
+
+### **Frontend Deployment**
+- **Vercel**: Optimized for Next.js applications (recommended)
+- **Netlify**: Static site generation support
+- **Docker**: Include frontend in containerized deployment
+
+### **Environment Configuration**
+```env
+# Backend (.env)
+OPENAI_API_KEY=your_openai_api_key
+CORS_ORIGINS=https://your-frontend.vercel.app,http://localhost:3000
+
+# Frontend (.env.local)
+NEXT_PUBLIC_BACKEND_URL=https://your-backend-api.com
+NEXT_PUBLIC_FRONTEND_URL=https://your-frontend.vercel.app
+```
+
+---
+
+## 🤝 Contributing
 
 Contributions are eagerly welcomed!  Help us make **Prompt** even more amazing.  Pull requests, feature suggestions, bug reports – all are highly appreciated!  Let's build the future of no-code chatbots together!
+
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### **Development Setup**
+1. Follow the installation guide above
+2. Make your changes with proper testing
+3. Ensure code follows our style guidelines
+4. Submit PR with detailed description
+
+---
+
 
 ## 📞 Contact
 
